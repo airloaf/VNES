@@ -4,27 +4,32 @@ namespace VNES { namespace Mapper {
 
 uint8_t Mapper0::cpu_read(uint16_t address)
 {
+	uint8_t retValue = 0;
+	uint8_t* prgRom = mFile->getProgramRom();
+
 	if (address >= 0x8000 && address < 0xC000) {
-		return mFile->getProgramRom()[0x8000 - address];
+		retValue = prgRom[address - 0x8000];
 	}
 	if(address >= 0xC000 && address <= 0xFFFF){
 		if(mFile->getFileHeader().prgRomSize >= 2){
-			return mFile->getProgramRom()[0x8000 - address];
+			retValue = prgRom[address - 0x8000];
 		}else{
-			return mFile->getProgramRom()[0xC000 - address];
+			retValue = prgRom[address - 0xC000];
 		}
 	}
+
+	return retValue;
 }
 void Mapper0::cpu_write(uint16_t address, uint8_t value)
 {
 	if (address >= 0x8000 && address < 0xC000) {
-		mFile->getProgramRom()[0x8000 - address] = value;
+		mFile->getProgramRom()[address - 0x8000] = value;
 	}
 	if(address >= 0xC000 && address <= 0xFFFF){
 		if(mFile->getFileHeader().prgRomSize >= 2){
-			mFile->getProgramRom()[0xC000 - address] = value;
+			mFile->getProgramRom()[address - 0xC000] = value;
 		}else{
-			mFile->getProgramRom()[0x8000 - address] = value;
+			mFile->getProgramRom()[address - 0x8000] = value;
 		}
 	}
 }
