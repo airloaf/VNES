@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "PPURegister.h"
+
 namespace VNES{ namespace PPU{
 
 class PPU
@@ -36,6 +38,9 @@ class PPU
 		void write(uint16_t address, uint8_t value);
 
 	private:
+
+		// The PPU registers (0x2000 - 0x2007 and 0x4014)
+		PPURegisters mRegisters;
 
 };
 
