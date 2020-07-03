@@ -150,10 +150,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Mappers\Mapper0.cpp" />
+    <ClCompile Include="src\Mappers\Mapper.cpp" />
+    <ClCompile Include="src\MemoryBus\CPUBus.cpp" />
+    <ClCompile Include="src\NES.cpp" />
     <ClCompile Include="src\FileParsers\INesFileParser.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Mappers\Mapper0.h" />
+    <ClInclude Include="src\Mappers\Mapper.h" />
+    <ClInclude Include="src\MemoryBus\CPUBus.h" />
+    <ClInclude Include="src\NES.h" />
     <ClInclude Include="src\FileParsers\INesFileParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
