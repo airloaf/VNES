@@ -1,6 +1,9 @@
 #pragma once
 
+#include <V6502/CPU.h>
+
 #include "FileParsers/INesFileParser.h"
+#include "MemoryBus/CPUBus.h"
 
 namespace VNES{
 
@@ -27,7 +30,17 @@ class NES {
 		void tick();
 
 	private:
+		// ROM file
 		VNES::FileParser::INESFile mFile;
+
+		// MOS 6502 CPU
+		V6502::CPU mCPU;
+
+		// CPU Memory Bus
+		MemoryBus::CPUBus mCPUBus;
+
+		// Mapper for the Cartridge
+		Mapper::Mapper *mMapper;
 };
 
 }

@@ -8,27 +8,39 @@
 
 namespace VNES{
 
-NES::NES()
+NES::NES(): mMapper(nullptr)
 {
+	// Set the CPU memory bus for the CPU
+	mCPU.setMemoryBus(&mCPUBus);
+
 }
 
 NES::~NES()
 {
+	delete mMapper;
 }
 
 void NES::loadRom(const std::string& file_path)
 {
+
+	// Delete previous mapper if there was any
+	delete mMapper;
+
 	// Load the rom
 	mFile.readFile(file_path);
 
 	// Create mapper
-	Mapper::Mapper0 mapper0;
-	mapper0.loadFile(mFile);
+	mMapper = new Mapper::Mapper0();
+	mMapper->loadFile(&mFile);
+
+	// Set the mapper in the CPU
+	mCPUBus.setMapper(mMapper);
 
 }
 
 void NES::tick()
 {
+	mCPU.tick();
 }
 
 }

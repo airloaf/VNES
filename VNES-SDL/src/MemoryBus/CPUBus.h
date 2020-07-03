@@ -2,8 +2,9 @@
 
 #include <V6502/MemoryBus.h>
 
-namespace VNES { namespace MemoryBus {
+#include "../Mappers/Mapper.h"
 
+namespace VNES { namespace MemoryBus {
 
 /**
  * @brief CPU bus for the NES
@@ -28,11 +29,19 @@ class CPUBus: public V6502::MemoryBus
 		 */
 		void write(uint16_t address, uint8_t value);
 
+		/**
+		 * @brief Sets the mapper for the CPU bus
+		 * 
+		 * @param mapper - the mapper to use for the bus
+		 */
+		void setMapper(Mapper::Mapper *mapper);
+
 	private:
 		// Internal Ram (0x0000 - 0x2000)
 		uint8_t mInternalRAM[0x800];
-		
 
+		// Mapper for addresses 0x4020 - 0xFFFF
+		Mapper::Mapper* mMapper;
 };
 
 }}

@@ -10,7 +10,7 @@ namespace VNES { namespace Mapper {
 	{
 	}
 
-	void Mapper::loadFile(const FileParser::INESFile& file)
+	void Mapper::loadFile(FileParser::INESFile *file)
 	{
 		mFile = file;
 	}

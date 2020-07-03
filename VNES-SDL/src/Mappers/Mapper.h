@@ -16,7 +16,7 @@ class Mapper
 		 * 
 		 * @param file - the file to use in the mapper
 		 */
-		void loadFile(const FileParser::INESFile& file);
+		void loadFile(FileParser::INESFile *file);
 
 		/**
 		 * @brief Reads from the correct cpu address using the mapper
@@ -51,7 +51,7 @@ class Mapper
 		virtual void ppu_write(uint16_t address, uint8_t value) = 0;
 
 	protected:
-		VNES::FileParser::INESFile mFile;
+		VNES::FileParser::INESFile *mFile;
 
 };
 
