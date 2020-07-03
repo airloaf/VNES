@@ -150,7 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\PPU.cpp" />
+    <ClCompile Include="src\PPU\PPU.cpp" />
     <ClCompile Include="src\Mappers\Mapper0.cpp" />
     <ClCompile Include="src\Mappers\Mapper.cpp" />
     <ClCompile Include="src\MemoryBus\CPUBus.cpp" />
@@ -159,7 +159,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\PPU.h" />
+    <ClInclude Include="src\PPU\PPU.h" />
     <ClInclude Include="src\Mappers\Mapper0.h" />
     <ClInclude Include="src\Mappers\Mapper.h" />
     <ClInclude Include="src\MemoryBus\CPUBus.h" />

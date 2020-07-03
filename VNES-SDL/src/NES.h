@@ -4,6 +4,7 @@
 
 #include "FileParsers/INesFileParser.h"
 #include "MemoryBus/CPUBus.h"
+#include "PPU/PPU.h"
 
 namespace VNES{
 
@@ -41,6 +42,9 @@ class NES {
 
 		// Mapper for the Cartridge
 		Mapper::Mapper *mMapper;
+
+		// Picture Processing Unit
+		PPU::PPU mPPU;
 };
 
 }

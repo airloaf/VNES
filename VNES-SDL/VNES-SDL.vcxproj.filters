@@ -33,7 +33,7 @@
     <ClCompile Include="src\Mappers\Mapper0.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PPU.cpp">
+    <ClCompile Include="src\PPU\PPU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,7 +53,7 @@
     <ClInclude Include="src\Mappers\Mapper0.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PPU.h">
+    <ClInclude Include="src\PPU\PPU.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

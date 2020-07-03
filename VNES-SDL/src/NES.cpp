@@ -13,6 +13,8 @@ NES::NES(): mMapper(nullptr)
 	// Set the CPU memory bus for the CPU
 	mCPU.setMemoryBus(&mCPUBus);
 
+	mCPUBus.setPPU(&mPPU);
+
 }
 
 NES::~NES()
