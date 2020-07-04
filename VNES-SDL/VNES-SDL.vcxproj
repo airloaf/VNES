@@ -159,6 +159,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\PPU\PPURegister.h" />
     <ClInclude Include="src\PPU\PPU.h" />
     <ClInclude Include="src\Mappers\Mapper0.h" />
     <ClInclude Include="src\Mappers\Mapper.h" />

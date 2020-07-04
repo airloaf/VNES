@@ -56,5 +56,8 @@
     <ClInclude Include="src\PPU\PPU.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\PPU\PPURegister.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

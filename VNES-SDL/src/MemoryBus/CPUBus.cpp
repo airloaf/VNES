@@ -15,6 +15,9 @@ uint8_t CPUBus::read(uint16_t address)
 	if(address >= 0x2000 && address < 0x4000){
 		retValue = mPPU->read(0x2000 + (address % 8));
 	}
+	if(address == 0x4014){
+		retValue = mPPU->read(address);
+	}
 
 	if(address >= 0x4020){
 		retValue = mMapper->cpu_read(address);
@@ -32,6 +35,9 @@ void CPUBus::write(uint16_t address, uint8_t value)
 
 	if(address >= 0x2000 && address < 0x4000){
 		mPPU->write(0x2000 + (address % 8), value);
+	}
+	if(address == 0x4014){
+		mPPU->write(address, value);
 	}
 
 	if(address >= 0x4020){
