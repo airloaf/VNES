@@ -4,7 +4,7 @@
 
 namespace VNES{
 
-NES::NES(): mMapper(nullptr)
+NES::NES(): mMapper(nullptr), mCycle(0)
 {
 	// Set the CPU memory bus for the CPU
 	mCPU.setMemoryBus(&mCPUBus);
@@ -13,6 +13,8 @@ NES::NES(): mMapper(nullptr)
 
 	// Set the PPU memory bus for the PPU
 	mPPU.setMemoryBus(&mPPUBus);
+
+	mPPU.setCPUReference(&mCPU);
 }
 
 NES::~NES()
@@ -41,7 +43,12 @@ void NES::loadRom(const std::string& file_path)
 
 void NES::tick()
 {
-	mCPU.tick();
+	if(mCycle == 0){
+		mCPU.tick();
+	}
+	mPPU.tick();
+
+	mCycle = (mCycle + 1) % 3;
 }
 
 }

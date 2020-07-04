@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <V6502/CPU.h>
+
 #include "PPURegister.h"
 #include "../MemoryBus/PPUBus.h"
 
@@ -45,6 +47,18 @@ class PPU
 		 */
 		void setMemoryBus(MemoryBus::PPUBus *bus);
 
+		/**
+		 * @brief set CPU reference
+		 * 
+		 * @param cpu - the cpu reference
+		 */
+		void setCPUReference(V6502::CPU* cpu);
+
+		/**
+		 * @brief PPU clock cycle function
+		 */
+		void tick();
+
 	private:
 
 		// The PPU registers (0x2000 - 0x2007 and 0x4014)
@@ -52,6 +66,16 @@ class PPU
 
 		// PPU bus
 		MemoryBus::PPUBus *mBus;
+
+		// Writing to the PPUADDR is different depending if its the first or second write
+		bool mFirstAddressWrite;
+
+		// PPU current Scan line and Cycle
+		int mCurrentScanLine;
+		int mCurrentCycle;
+
+		// Reference to CPU so we can generate NMI requests
+		V6502::CPU *mCPU;
 
 };
 

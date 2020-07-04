@@ -51,6 +51,9 @@ class NES {
 
 		// PPU Memory Bus
 		MemoryBus::PPUBus mPPUBus;
+
+		// Current clock cycle
+		int mCycle;
 };
 
 }

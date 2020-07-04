@@ -26,7 +26,7 @@ struct PPURegisters{
 	uint8_t OAMADDR;	// 0x2003
 	uint8_t OAMDATA;	// 0x2004
 	uint8_t PPUSCROLL;	// 0x2005
-	uint8_t PPUADDR;	// 0x2006
+	uint16_t PPUADDR;	// 0x2006
 	uint8_t PPUDATA;	// 0x2007
 	uint8_t OAMDMA;	// 0x4014
 
