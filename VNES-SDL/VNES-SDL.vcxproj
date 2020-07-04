@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\MemoryBus\PPUBus.cpp" />
     <ClCompile Include="src\PPU\PPU.cpp" />
     <ClCompile Include="src\Mappers\Mapper0.cpp" />
     <ClCompile Include="src\Mappers\Mapper.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MemoryBus\PPUBus.h" />
     <ClInclude Include="src\PPU\PPURegister.h" />
     <ClInclude Include="src\PPU\PPU.h" />
     <ClInclude Include="src\Mappers\Mapper0.h" />
@@ -166,6 +168,9 @@
     <ClInclude Include="src\MemoryBus\CPUBus.h" />
     <ClInclude Include="src\NES.h" />
     <ClInclude Include="src\FileParsers\INesFileParser.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

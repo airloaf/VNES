@@ -3,7 +3,10 @@
 #include <V6502/CPU.h>
 
 #include "FileParsers/INesFileParser.h"
+
 #include "MemoryBus/CPUBus.h"
+#include "MemoryBus/PPUBus.h"
+
 #include "PPU/PPU.h"
 
 namespace VNES{
@@ -45,6 +48,9 @@ class NES {
 
 		// Picture Processing Unit
 		PPU::PPU mPPU;
+
+		// PPU Memory Bus
+		MemoryBus::PPUBus mPPUBus;
 };
 
 }

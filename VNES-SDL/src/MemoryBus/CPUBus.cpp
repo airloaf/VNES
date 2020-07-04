@@ -1,8 +1,13 @@
 #include "CPUBus.h"
 
 namespace VNES{ namespace MemoryBus {
-
-uint8_t CPUBus::read(uint16_t address)
+	CPUBus::CPUBus() : mPPU(nullptr), mMapper(nullptr)
+	{
+	}
+	CPUBus::~CPUBus()
+	{
+	}
+	uint8_t CPUBus::read(uint16_t address)
 {
 
 	uint8_t retValue = 0;

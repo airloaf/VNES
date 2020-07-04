@@ -1,10 +1,6 @@
 #include "NES.h"
 
-#include "FileParsers/INesFileParser.h"
-#include "MemoryBus/CPUBus.h"
 #include "Mappers/Mapper0.h"
-
-#include <iostream>
 
 namespace VNES{
 
@@ -15,6 +11,8 @@ NES::NES(): mMapper(nullptr)
 
 	mCPUBus.setPPU(&mPPU);
 
+	// Set the PPU memory bus for the PPU
+	mPPU.setMemoryBus(&mPPUBus);
 }
 
 NES::~NES()
@@ -35,8 +33,9 @@ void NES::loadRom(const std::string& file_path)
 	mMapper = new Mapper::Mapper0();
 	mMapper->loadFile(&mFile);
 
-	// Set the mapper in the CPU
+	// Set the mapper in the CPU and PPU
 	mCPUBus.setMapper(mMapper);
+	mPPUBus.setMapper(mMapper);
 
 }
 

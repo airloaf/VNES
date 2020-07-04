@@ -36,6 +36,9 @@
     <ClCompile Include="src\PPU\PPU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MemoryBus\PPUBus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FileParsers\INesFileParser.h">
@@ -59,5 +62,11 @@
     <ClInclude Include="src\PPU\PPURegister.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\MemoryBus\PPUBus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

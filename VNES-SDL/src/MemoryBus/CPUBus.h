@@ -14,6 +14,9 @@ class CPUBus: public V6502::MemoryBus
 {
 	public:
 
+		CPUBus();
+		~CPUBus();
+
 		/**
 		 * @brief Reads from the CPU bus given the address
 		 * 

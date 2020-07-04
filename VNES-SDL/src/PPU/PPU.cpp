@@ -76,4 +76,9 @@ namespace VNES {namespace PPU {
 		}
 	}
 
+	void PPU::setMemoryBus(MemoryBus::PPUBus* bus)
+	{
+		mBus = bus;
+	}
+
 }}
