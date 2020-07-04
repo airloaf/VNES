@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <SDL2/SDL.h>
 
 #include "PPURegister.h"
 #include "../MemoryBus/PPUBus.h"
@@ -45,6 +46,11 @@ class PPU
 		 */
 		void setMemoryBus(MemoryBus::PPUBus *bus);
 
+		/**
+		 * @brief PPU clock tick
+		 */
+		void tick();
+
 	private:
 
 		// The PPU registers (0x2000 - 0x2007 and 0x4014)
@@ -52,6 +58,10 @@ class PPU
 
 		// PPU bus
 		MemoryBus::PPUBus *mBus;
+
+		// SDL Window
+		SDL_Window *mWindow;
+		SDL_Renderer *mRenderer;
 
 };
 

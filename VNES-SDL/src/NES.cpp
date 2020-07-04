@@ -42,6 +42,7 @@ void NES::loadRom(const std::string& file_path)
 void NES::tick()
 {
 	mCPU.tick();
+	mPPU.tick();
 }
 
 }

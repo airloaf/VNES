@@ -1,15 +1,16 @@
 #include <iostream>
 
-
 #include "NES.h"
 
 int main(int argc, char* argv[]) {
 
-	VNES::NES nes;
-	nes.loadRom("../roms/SuperMarioBros.nes");
+	if(argc > 1){
+		VNES::NES nes;
+		nes.loadRom(argv[1]);
 
-	while (1) {
-		nes.tick();
+		while (1) {
+			nes.tick();
+		}
 	}
 
 	return 0;
