@@ -1,5 +1,7 @@
 #include "PPU.h"
 
+#include <iostream>
+
 namespace VNES {namespace PPU {
 
 	PPU::PPU() : mFirstAddressWrite(true), mCurrentScanLine(-1), mCurrentCycle(0)
@@ -148,6 +150,16 @@ namespace VNES {namespace PPU {
 			}
 		}
 
+	}
+
+	void PPU::renderNameTable(){
+
+		// Renders the name table
+		std::cout << "Start of nametable render" << std::endl;
+
+		
+
+		std::cout << "End of nametable render" << std::endl;
 	}
 
 }}

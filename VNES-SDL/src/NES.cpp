@@ -15,11 +15,18 @@ NES::NES(): mMapper(nullptr), mCycle(0)
 	mPPU.setMemoryBus(&mPPUBus);
 
 	mPPU.setCPUReference(&mCPU);
+
+
+	mWindow = SDL_CreateWindow("NameTable Renderer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 800, SDL_WINDOW_SHOWN);
+	mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
+
 }
 
 NES::~NES()
 {
 	delete mMapper;
+	SDL_DestroyWindow(mWindow);
+	SDL_DestroyRenderer(mRenderer);
 }
 
 void NES::loadRom(const std::string& file_path)
@@ -43,12 +50,23 @@ void NES::loadRom(const std::string& file_path)
 
 void NES::tick()
 {
-	if(mCycle == 0){
-		mCPU.tick();
-	}
-	mPPU.tick();
+	bool quit = false;
+	while(!quit){
 
-	mCycle = (mCycle + 1) % 3;
+		SDL_Event event;
+		while(SDL_PollEvent(&event)){
+			if(event.type == SDL_QUIT){
+				quit = true;
+			}
+		}
+
+		if(mCycle == 0){
+			mCPU.tick();
+		}
+		mPPU.tick();
+
+		mCycle = (mCycle + 1) % 3;
+	}
 }
 
 }

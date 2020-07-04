@@ -59,6 +59,8 @@ class PPU
 		 */
 		void tick();
 
+		void renderNameTable();
+
 	private:
 
 		// The PPU registers (0x2000 - 0x2007 and 0x4014)
