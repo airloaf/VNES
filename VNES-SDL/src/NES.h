@@ -56,6 +56,7 @@ class NES {
 
 		// Current clock cycle
 		int mCycle;
+		int mPPUCycle;
 
 		// Window and renderer
 		SDL_Window *mWindow;

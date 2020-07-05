@@ -4,7 +4,7 @@
 
 namespace VNES{
 
-NES::NES(): mMapper(nullptr), mCycle(0)
+NES::NES(): mMapper(nullptr), mCycle(0), mPPUCycle(0)
 {
 	// Set the CPU memory bus for the CPU
 	mCPU.setMemoryBus(&mCPUBus);
@@ -53,26 +53,30 @@ void NES::tick()
 	bool quit = false;
 	while(!quit){
 
-		SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_RenderClear(mRenderer);
-
-		SDL_Event event;
-		while(SDL_PollEvent(&event)){
-			if(event.type == SDL_QUIT){
-				quit = true;
-			}
-		}
-
 		if(mCycle == 0){
 			mCPU.tick();
 		}
 		mPPU.tick();
 
-		mPPU.renderNameTable(mRenderer);
+
+		// TMP rendering for debugging
+		if(mPPUCycle == 0){
+
+			SDL_Event event;
+			while(SDL_PollEvent(&event)){
+				if(event.type == SDL_QUIT){
+					quit = true;
+				}
+			}
+
+			SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_RenderClear(mRenderer);
+			mPPU.renderNameTable(mRenderer);
+			SDL_RenderPresent(mRenderer);
+		}
 
 		mCycle = (mCycle + 1) % 3;
-
-		SDL_RenderPresent(mRenderer);
+		mPPUCycle = (mPPUCycle + 1) % (341 * 261);
 	}
 }
 
