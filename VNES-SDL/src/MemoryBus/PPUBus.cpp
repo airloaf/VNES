@@ -19,18 +19,24 @@ namespace VNES {namespace MemoryBus {
 			retValue = mMapper->ppu_read(address);
 		}
 
-		if(address >= 0x2000 && address < 0x3EFF){
-			if(address > 0x3000){
+		if (address >= 0x2000 && address < 0x3EFF) {
+			if (address >= 0x3000) {
 				address = 0x2000 + (address - 0x3000);
 			}
 
 			int index = 0;
-			if(address >= 0x2400 && address < 0x2800){
+			if(address >= 0x2000 && address < 0x2400){
+				index = 0;
+				address -= 0x2000;
+			}else if (address >= 0x2400 && address < 0x2800) {
 				index = 1;
+				address -= 0x2400;
 			}else if(address >= 0x2800 && address < 0x2C00){
 				index = 2;
+				address -= 0x2800;
 			}else if(address >= 0x2C00 && address < 0x3000){
 				index = 3;
+				address -= 0x2C00;
 			}
 			retValue = mNameTables[index].read(address);
 		}

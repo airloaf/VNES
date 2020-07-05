@@ -53,6 +53,9 @@ void NES::tick()
 	bool quit = false;
 	while(!quit){
 
+		SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_RenderClear(mRenderer);
+
 		SDL_Event event;
 		while(SDL_PollEvent(&event)){
 			if(event.type == SDL_QUIT){
@@ -65,7 +68,11 @@ void NES::tick()
 		}
 		mPPU.tick();
 
+		mPPU.renderNameTable(mRenderer);
+
 		mCycle = (mCycle + 1) % 3;
+
+		SDL_RenderPresent(mRenderer);
 	}
 }
 
