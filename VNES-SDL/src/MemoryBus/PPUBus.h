@@ -2,6 +2,7 @@
 
 #include <V6502/MemoryBus.h>
 #include "../Mappers/Mapper.h"
+#include "../PPU/NameTable.h"
 
 namespace VNES{ namespace MemoryBus{
 
@@ -33,6 +34,7 @@ class PPUBus: public V6502::MemoryBus
 
 	private:
 		Mapper::Mapper* mMapper;
+		PPU::NameTable mNameTables[4];
 };
 
 }}

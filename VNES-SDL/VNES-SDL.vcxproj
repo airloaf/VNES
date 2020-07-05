@@ -99,7 +99,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,7 +129,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,10 +146,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>V6502.lib;SDL2main.lib;SDL2.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\PPU\NameTable.cpp" />
     <ClCompile Include="src\MemoryBus\PPUBus.cpp" />
     <ClCompile Include="src\PPU\PPU.cpp" />
     <ClCompile Include="src\Mappers\Mapper0.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\PPU\NameTable.h" />
     <ClInclude Include="src\MemoryBus\PPUBus.h" />
     <ClInclude Include="src\PPU\PPURegister.h" />
     <ClInclude Include="src\PPU\PPU.h" />

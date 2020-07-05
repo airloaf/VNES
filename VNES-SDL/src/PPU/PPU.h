@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <V6502/CPU.h>
+#include <SDL2/SDL.h>
 
 #include "PPURegister.h"
 #include "../MemoryBus/PPUBus.h"
@@ -59,7 +60,11 @@ class PPU
 		 */
 		void tick();
 
+		void renderNameTable(SDL_Renderer *renderer);
+
 	private:
+
+		void renderTile(SDL_Renderer* renderer, uint8_t tileID, int x, int y);
 
 		// The PPU registers (0x2000 - 0x2007 and 0x4014)
 		PPURegisters mRegisters;
@@ -76,6 +81,8 @@ class PPU
 
 		// Reference to CPU so we can generate NMI requests
 		V6502::CPU *mCPU;
+
+	bool render = true;
 
 };
 

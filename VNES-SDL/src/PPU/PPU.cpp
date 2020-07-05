@@ -1,5 +1,7 @@
 #include "PPU.h"
 
+#include <iostream>
+
 namespace VNES {namespace PPU {
 
 	PPU::PPU() : mFirstAddressWrite(true), mCurrentScanLine(-1), mCurrentCycle(0)
@@ -148,6 +150,88 @@ namespace VNES {namespace PPU {
 			}
 		}
 
+	}
+
+	void switchPallete(SDL_Renderer *renderer, int pallete){
+		switch (pallete) {
+		case 0:
+			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+			break;
+		case 1:
+			SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+			break;
+		case 2:
+			SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
+			break;
+		case 3:
+			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
+			break;
+		}
+	}
+
+	void PPU::renderTile(SDL_Renderer *renderer, uint8_t tileID, int x, int y){
+		int PIXELS_PER_TILE = 8;
+		int PIXELS_PER_TILE_PIXEL = 3;
+
+		uint8_t lsbPlane[8];
+		uint8_t msbPlane[8];
+
+		uint16_t tileAddress = tileID * 16;
+
+		// Read lsb and msb plane
+		for(int i = 0; i < 8; i++){
+			lsbPlane[i] = mBus->read(tileAddress + i);
+			msbPlane[i] = mBus->read(tileAddress + i + 8);
+		}
+
+		for(int tileY = 0; tileY < 8; tileY++){
+			uint8_t lsb = lsbPlane[tileY];
+			uint8_t msb = msbPlane[tileY];
+			for(int tileX = 0; tileX < 8; tileX++){
+				int pallete = 0;
+				pallete |= (lsb & 0x80) >> 7;
+				pallete |= (msb & 0x80) >> 6;
+				lsb <<= 1;
+				msb <<= 1;
+
+				switchPallete(renderer, pallete);
+
+				int drawX = x + tileX * PIXELS_PER_TILE_PIXEL;
+				int drawY = y + tileY * PIXELS_PER_TILE_PIXEL;
+
+				for(int i = 0; i < 3; i++){
+					for(int i2 = 0; i2 < 3; i2++){
+						SDL_RenderDrawPoint(renderer, drawX + i, drawY + i2);
+					}
+				}
+
+			}
+		}
+
+	}
+
+	void PPU::renderNameTable(SDL_Renderer *renderer){
+
+		int PIXELS_PER_TILE = 8;
+		int PIXELS_PER_TILE_PIXEL = 3;
+		uint16_t baseAddress = 0x2400;
+
+		if(render){
+		
+			// Render nametable 1
+			int NUM_ROWS = 32;
+			int NUM_COLS = 32;
+
+			for(int table_row = 0; table_row < NUM_ROWS; table_row++){
+				for(int table_col = 0; table_col < NUM_COLS; table_col++){
+					uint16_t nameTableAddress = baseAddress + table_col + table_row*NUM_COLS;
+					uint8_t tileID = mBus->read(nameTableAddress);
+					int x = table_col * PIXELS_PER_TILE * PIXELS_PER_TILE_PIXEL;
+					int y = table_row * PIXELS_PER_TILE * PIXELS_PER_TILE_PIXEL;
+					renderTile(renderer, tileID, x, y);
+				}
+			}
+		}
 	}
 
 }}

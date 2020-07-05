@@ -9,6 +9,8 @@
 
 #include "PPU/PPU.h"
 
+#include <SDL2/SDL.h>
+
 namespace VNES{
 
 /**
@@ -54,6 +56,10 @@ class NES {
 
 		// Current clock cycle
 		int mCycle;
+
+		// Window and renderer
+		SDL_Window *mWindow;
+		SDL_Renderer *mRenderer;
 };
 
 }
