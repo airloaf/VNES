@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 		nes.tick();
 		nes.render(renderer);
 		poll++;
-		poll %= 30000;
+		poll %= 300000;
 	}
 
 	return 0;

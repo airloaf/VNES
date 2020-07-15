@@ -70,7 +70,7 @@ void NES::tick()
 	}
 	mPPU.tick();
 
-	mCycle = (mCycle + 1) % 1;
+	mCycle = (mCycle + 1) % 3;
 }
 
 void NES::render(SDL_Renderer *renderer){

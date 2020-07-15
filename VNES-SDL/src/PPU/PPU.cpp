@@ -114,7 +114,7 @@ namespace VNES {namespace PPU {
 				break;
 		}
 	}
-		
+	
 	void PPU::tick()
 	{
 		handleCycle();
@@ -320,20 +320,10 @@ namespace VNES {namespace PPU {
 		if(mCurrentScanLine < 240 && mCurrentCycle == 00){
 			SDL_SetRenderTarget(renderer, mFrame);
 
-			/*
-			std::cout << "Scan Line" << std::endl;
-			for(int i = 0; i < 256; i++){
-				std::cout << (int) mScanLine.pixels[i] << " ";
-			}
-			std::cout << std::endl;
-			*/
-
 			renderScanLine(renderer);
 		}
 
-		if(mCurrentScanLine == 240){
-			std::cout << "Frame: " << frame++;
-			std::cout << "Emulator Seconds: " << (int) frame / 60 << std::endl;
+		if(mCurrentScanLine == 240 && mCurrentCycle == 0){
 			SDL_SetRenderTarget(renderer, nullptr);
 			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 			SDL_RenderClear(renderer);
