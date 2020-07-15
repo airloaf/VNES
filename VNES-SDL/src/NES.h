@@ -9,8 +9,6 @@
 
 #include "PPU/PPU.h"
 
-#include <SDL2/SDL.h>
-
 namespace VNES{
 
 /**
@@ -35,6 +33,8 @@ class NES {
 		 */
 		void tick();
 
+		void render(SDL_Renderer *renderer);
+
 	private:
 		// ROM file
 		VNES::FileParser::INESFile mFile;
@@ -42,25 +42,17 @@ class NES {
 		// MOS 6502 CPU
 		V6502::CPU mCPU;
 
-		// CPU Memory Bus
+		// Picture Processing Unit
+		PPU::PPU mPPU;
+
 		MemoryBus::CPUBus mCPUBus;
+		MemoryBus::PPUBus mPPUBus;
 
 		// Mapper for the Cartridge
 		Mapper::Mapper *mMapper;
 
-		// Picture Processing Unit
-		PPU::PPU mPPU;
-
-		// PPU Memory Bus
-		MemoryBus::PPUBus mPPUBus;
-
 		// Current clock cycle
 		int mCycle;
-		int mPPUCycle;
-
-		// Window and renderer
-		SDL_Window *mWindow;
-		SDL_Renderer *mRenderer;
 };
 
 }

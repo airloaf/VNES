@@ -20,16 +20,25 @@ namespace VNES{ namespace PPU{
  * The 9 registers of the PPU
  */
 struct PPURegisters{
-	uint8_t PPUCTRL;	// 0x2000
-	uint8_t PPUMASK;	// 0x2001
-	uint8_t PPUSTATUS;	// 0x2002
-	uint8_t OAMADDR;	// 0x2003
-	uint8_t OAMDATA;	// 0x2004
-	uint8_t PPUSCROLL;	// 0x2005
-	uint16_t PPUADDR;	// 0x2006
-	uint8_t PPUDATA;	// 0x2007
-	uint8_t OAMDMA;	// 0x4014
+	uint8_t PPUCTRL;		// 0x2000
+	uint8_t PPUMASK;		// 0x2001
+	uint8_t PPUSTATUS;		// 0x2002
+	uint8_t OAMADDR;		// 0x2003
+	uint8_t OAMDATA;		// 0x2004
+	uint8_t PPUSCROLL_X;	// 0x2005
+	uint8_t PPUSCROLL_Y;	// 0x2005
+	uint16_t PPUADDR;		// 0x2006
+	uint8_t PPUDATA;		// 0x2007
+	uint8_t OAMDMA;			// 0x4014
 
+	bool useLeftPatternTable;
+
+};
+
+struct ScrollRegister{
+	uint8_t fineX, fineY;
+	uint8_t coarseX, coarseY;
+	uint8_t nameTable;
 };
 
 }}

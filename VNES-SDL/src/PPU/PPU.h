@@ -10,6 +10,16 @@
 
 namespace VNES{ namespace PPU{
 
+typedef uint8_t Pixel;
+
+struct ScanLine {
+	Pixel pixels[256];
+};
+
+struct Frame {
+	ScanLine scanLines[240];
+};
+
 class PPU
 {
 	public:
@@ -17,63 +27,36 @@ class PPU
 		PPU();
 		~PPU();
 
-		/**
-		 * @brief Read from the given address into the PPU
-		 * 
-		 * The PPU can be read from addresses 0x2000 - 0x2007,
-		 * repeated from 0x2008 - 0x3FFF. Also address 0x4014
-		 * can be addressed to write OAM data quickly.
-		 * 
-		 * @param address - the address to read into the PPU
-		 * @return 
-		 */
-		uint8_t read(uint16_t address);
+		uint8_t cpuRead(uint16_t address);
+		void cpuWrite(uint16_t address, uint8_t value);
 
-		/**
-		 * @brief Write to the PPU at the given address
-		 * 
-		 * The PPU can be written to from addresses 0x2000 - 0x2007,
-		 * repeated from 0x2008 - 0x3FFF. Also address 0x4014
-		 * can be addressed to write OAM data quickly.
-		 * 
-		 * @param address - the address to write into the PPU address
-		 * @param value - the value to write
-		 */
-		void write(uint16_t address, uint8_t value);
-
-		/**
-		 * @brief PPU bus reference
-		 * 
-		 * @param bus - the ppu bus reference
-		 */
 		void setMemoryBus(MemoryBus::PPUBus *bus);
-
-		/**
-		 * @brief set CPU reference
-		 * 
-		 * @param cpu - the cpu reference
-		 */
 		void setCPUReference(V6502::CPU* cpu);
 
-		/**
-		 * @brief PPU clock cycle function
-		 */
 		void tick();
 
-		void renderNameTable(SDL_Renderer *renderer);
+		void render(SDL_Renderer* renderer);
 
 	private:
 
-		void renderTile(SDL_Renderer* renderer, uint8_t tileID, int x, int y);
+		uint8_t fetchPatternHigh(uint8_t tileEntry, uint8_t row);
+		uint8_t fetchPatternLow(uint8_t tileEntry, uint8_t row);
+		uint8_t fetchNametableEntry(uint8_t row, uint8_t col);
 
-		// The PPU registers (0x2000 - 0x2007 and 0x4014)
+		void renderScanLine(SDL_Renderer* renderer);
+		void renderPatternTable(SDL_Renderer* renderer);
+
+		void handleCycle();
+
 		PPURegisters mRegisters;
+		ScrollRegister mScrollRegisters;
 
 		// PPU bus
 		MemoryBus::PPUBus *mBus;
 
-		// Writing to the PPUADDR is different depending if its the first or second write
+		// Writing to the PPUADDR or PPUSCROLL is different depending if its the first or second write
 		bool mFirstAddressWrite;
+		bool mFirstScrollWrite;
 
 		// PPU current Scan line and Cycle
 		int mCurrentScanLine;
@@ -82,8 +65,9 @@ class PPU
 		// Reference to CPU so we can generate NMI requests
 		V6502::CPU *mCPU;
 
-	bool render = true;
+		ScanLine mScanLine;
 
+		SDL_Texture* mFrame;
 };
 
 }}

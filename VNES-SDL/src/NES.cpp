@@ -4,34 +4,22 @@
 
 namespace VNES{
 
-NES::NES(): mMapper(nullptr), mCycle(0), mPPUCycle(0)
+NES::NES(): mMapper(nullptr), mCycle(0)
 {
-	// Set the CPU memory bus for the CPU
 	mCPU.setMemoryBus(&mCPUBus);
-
 	mCPUBus.setPPU(&mPPU);
 
-	// Set the PPU memory bus for the PPU
 	mPPU.setMemoryBus(&mPPUBus);
-
 	mPPU.setCPUReference(&mCPU);
-
-
-	mWindow = SDL_CreateWindow("NameTable Renderer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 800, SDL_WINDOW_SHOWN);
-	mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
-
 }
 
 NES::~NES()
 {
 	delete mMapper;
-	SDL_DestroyWindow(mWindow);
-	SDL_DestroyRenderer(mRenderer);
 }
 
 void NES::loadRom(const std::string& file_path)
 {
-
 	// Delete previous mapper if there was any
 	delete mMapper;
 
@@ -46,38 +34,48 @@ void NES::loadRom(const std::string& file_path)
 	mCPUBus.setMapper(mMapper);
 	mPPUBus.setMapper(mMapper);
 
+
+	// Run for 6 cycles on cpu startup
+	for (int i = 0; i < 6; i++) {
+		mCPU.tick();
+	}
+
+	V6502::RegisterFile rf = mCPU.getRegisterFile();
+	rf.status = 0x34;
+	rf.accumulator = 0;
+	rf.indexX = 0;
+	rf.indexY = 0;
+	mCPUBus.write(0x4017, 0x00);
+	mCPUBus.write(0x4015, 0x00);
+	for (int i = 0x4000; i <= 0x400F; i++) {
+		mCPUBus.write(i, 0x00);
+	}
+	mCPUBus.write(0x4010, 0x00);
+	mCPUBus.write(0x4011, 0x00);
+	mCPUBus.write(0x4012, 0x00);
+	mCPUBus.write(0x4013, 0x00);
+
+	mPPUBus.write(0x2000, 0x00);
+	mPPUBus.write(0x2001, 0x00);
+	mPPUBus.write(0x2002, 0xA0);
+	mPPUBus.write(0x2003, 0x00);
+	mPPUBus.write(0x2005, 0x00);
+	mPPUBus.write(0x2006, 0x00);
 }
 
 void NES::tick()
 {
-	bool quit = false;
-	while(!quit){
-
-		if(mCycle == 0){
-			mCPU.tick();
-		}
-		mPPU.tick();
-
-
-		// TMP rendering for debugging
-		if(mPPUCycle == 0){
-
-			SDL_Event event;
-			while(SDL_PollEvent(&event)){
-				if(event.type == SDL_QUIT){
-					quit = true;
-				}
-			}
-
-			SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
-			SDL_RenderClear(mRenderer);
-			mPPU.renderNameTable(mRenderer);
-			SDL_RenderPresent(mRenderer);
-		}
-
-		mCycle = (mCycle + 1) % 3;
-		mPPUCycle = (mPPUCycle + 1) % (341 * 261);
+	if(mCycle == 0){
+		mCPU.tick();
 	}
+	mPPU.tick();
+
+	mCycle = (mCycle + 1) % 1;
+}
+
+void NES::render(SDL_Renderer *renderer){
+	mPPU.render(renderer);
+	SDL_SetRenderTarget(renderer, nullptr);
 }
 
 }

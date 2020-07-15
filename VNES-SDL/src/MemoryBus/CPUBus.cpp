@@ -18,10 +18,10 @@ namespace VNES{ namespace MemoryBus {
 		}
 
 		if(address >= 0x2000 && address < 0x4000){
-			retValue = mPPU->read(0x2000 + (address % 8));
+			retValue = mPPU->cpuRead(0x2000 + (address % 8));
 		}
 		if(address == 0x4014){
-			retValue = mPPU->read(address);
+			retValue = mPPU->cpuRead(address);
 		}
 
 		if(address >= 0x4020){
@@ -39,10 +39,10 @@ namespace VNES{ namespace MemoryBus {
 		}
 
 		if(address >= 0x2000 && address < 0x4000){
-			mPPU->write(0x2000 + (address % 8), value);
+			mPPU->cpuWrite(0x2000 + (address % 8), value);
 		}
 		if(address == 0x4014){
-			mPPU->write(address, value);
+			mPPU->cpuWrite(address, value);
 		}
 
 		if(address >= 0x4020){
