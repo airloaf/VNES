@@ -28,7 +28,6 @@ class PPU
 		void setRenderer(Renderer *renderer);
 
 	private:
-
 		uint8_t fetchPatternHigh(uint8_t tileEntry, uint8_t row);
 		uint8_t fetchPatternLow(uint8_t tileEntry, uint8_t row);
 		uint8_t fetchNametableEntry(uint8_t row, uint8_t col);
@@ -53,10 +52,6 @@ class PPU
 		V6502::CPU *mCPU;
 
 		Frame mFrameData;
-
-		// Pixel data
-		PixelData *mPixelData;
-		int mPitch[241];
 
 		// Our renderer instance
 		Renderer* mRenderer;

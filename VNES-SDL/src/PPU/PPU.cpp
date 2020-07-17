@@ -9,9 +9,7 @@ namespace VNES {namespace PPU {
 		mRegisters.PPUSTATUS = 0x80;
 	}
 
-	PPU::~PPU()
-	{
-	}
+	PPU::~PPU(){}
 
 	uint8_t PPU::cpuRead(uint16_t address)
 	{

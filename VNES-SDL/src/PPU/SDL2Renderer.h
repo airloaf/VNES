@@ -18,11 +18,17 @@ class SDL2Renderer: public VNES::PPU::Renderer
 	private:
 
 		void writeFrameToTexture();
+	
+		struct PixelData{
+			uint8_t a;
+			uint8_t b;
+			uint8_t g;
+			uint8_t r;
+		} *mPixelData;
 
 		SDL_Texture *mFrameTexture;
 		VNES::PPU::Frame mFrameData;
 
-		VNES::PPU::PixelData *mPixelData;
 		int *mPitch;
 
 		bool mReady;

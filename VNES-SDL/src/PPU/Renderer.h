@@ -12,17 +12,6 @@ struct Frame {
 	ScanLine scanLines[240];
 };
 
-// SDL2 specific stuff
-// The order must be a, b, g, r. C byte packs from the bottom up for this struct
-// This means the first byte for a PixelData instance will be r followed by g then b then a
-// If the order was reversed then it would be a then b then g then r
-struct PixelData{
-	uint8_t a;
-	uint8_t b;
-	uint8_t g;
-	uint8_t r;
-};
-
 class Renderer {
 	public:
 
