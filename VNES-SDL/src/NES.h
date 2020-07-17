@@ -8,6 +8,7 @@
 #include "MemoryBus/PPUBus.h"
 
 #include "PPU/PPU.h"
+#include "PPU/Renderer.h"
 
 namespace VNES{
 
@@ -33,8 +34,7 @@ class NES {
 		 */
 		void tick();
 
-		void render(SDL_Renderer *renderer);
-
+		void setRenderer(PPU::Renderer *renderer);
 	private:
 		// ROM file
 		VNES::FileParser::INESFile mFile;

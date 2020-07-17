@@ -4,14 +4,13 @@
 
 namespace VNES {namespace PPU {
 
-	PPU::PPU() : mBus(nullptr), mCPU(nullptr), mFirstAddressWrite(true), mCurrentScanLine(-1), mCurrentCycle(0), mFrame(nullptr)
+	PPU::PPU() : mBus(nullptr), mCPU(nullptr), mFirstAddressWrite(true), mCurrentScanLine(-1), mCurrentCycle(0), mRenderer(nullptr)
 	{
 		mRegisters.PPUSTATUS = 0x80;
 	}
 
 	PPU::~PPU()
 	{
-		SDL_DestroyTexture(mFrame);
 	}
 
 	uint8_t PPU::cpuRead(uint16_t address)
@@ -136,6 +135,14 @@ namespace VNES {namespace PPU {
 			// Increment scan line
 			mCurrentScanLine++;
 
+			// If we have finished generating the frame, send it to the renderer
+			if(mCurrentScanLine == 240){
+				if(mRenderer){
+					mRenderer->handleFrame(mFrameData);
+					mRenderer->readyToRender();
+				}
+			}
+
 			// Check if the vblank flag should be set
 			if (mCurrentScanLine == 241) {
 
@@ -229,126 +236,8 @@ namespace VNES {namespace PPU {
 		mCPU = cpu;
 	}
 
-	void PPU::renderFrame(SDL_Renderer *renderer){
-		for(int row = 0; row < 240; row++){
-			ScanLine scanLine = mFrameData.scanLines[row];
-			for(int col = 0; col < 256; col++){
-				int pallete = scanLine.pixels[col];
-				PixelData &data = mPixelData[row * 256 + col];
-				switch(pallete){
-				case 0:
-					data.r = 0x00;
-					data.g = 0x00;
-					data.b = 0x00;
-					data.a = 0xFF;
-					break;
-				case 1:
-					data.r = 0xFF;
-					data.g = 0x00;
-					data.b = 0x00;
-					data.a = 0xFF;
-					break;
-				case 2:
-					data.r = 0x00;
-					data.g = 0xFF;
-					data.b = 0x00;
-					data.a = 0xFF;
-					break;
-				case 3:
-					data.r = 0x00;
-					data.g = 0x00;
-					data.b = 0xFF;
-					data.a = 0xFF;
-					break;
-				}
-			}
-		}
-	}
-
-	void PPU::renderPatternTable(SDL_Renderer *renderer){
-		SDL_SetRenderTarget(renderer, mFrame);
-		for (int tileRow = 0; tileRow < 16; tileRow++) {
-			for(int tileCol = 0; tileCol < 16; tileCol++){
-				for(int row = 0; row < 8; row++){
-					uint8_t patternLow = fetchPatternLow(tileRow * 16 + tileCol, row);
-					uint8_t patternHigh = fetchPatternHigh(tileRow * 16 + tileCol, row);
-				
-					uint8_t lowBits[8];
-					uint8_t highBits[8];
-
-					lowBits[0] = (patternLow & 0x80) >> 7;
-					lowBits[1] = (patternLow & 0x40) >> 6;
-					lowBits[2] = (patternLow & 0x20) >> 5;
-					lowBits[3] = (patternLow & 0x10) >> 4;
-					lowBits[4] = (patternLow & 0x08) >> 3;
-					lowBits[5] = (patternLow & 0x04) >> 2;
-					lowBits[6] = (patternLow & 0x02) >> 1;
-					lowBits[7] = (patternLow & 0x01) >> 0;
-
-					highBits[0] = (patternHigh & 0x80) >> 6;
-					highBits[1] = (patternHigh & 0x40) >> 5;
-					highBits[2] = (patternHigh & 0x20) >> 4;
-					highBits[3] = (patternHigh & 0x10) >> 3;
-					highBits[4] = (patternHigh & 0x08) >> 2;
-					highBits[5] = (patternHigh & 0x04) >> 1;
-					highBits[6] = (patternHigh & 0x02) >> 0;
-					highBits[7] = (patternHigh & 0x01) << 1;
-
-					uint8_t palletes[8];
-					for (int i = 0; i < 8; i++) {
-						palletes[i] = highBits[i] | lowBits[i];
-					}
-
-					for(int col = 0; col < 8; col++){
-						switch(palletes[col]){
-						case 0:
-							SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-							break;
-						case 1:
-							SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-							break;
-						case 2:
-							SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
-							break;
-						case 3:
-							SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
-							break;
-						default:
-							SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-							break;
-						}
-						SDL_RenderDrawPoint(renderer, tileCol * 8 + col, tileRow * 8 + row);
-					}
-
-				}
-			}
-		}
-	}
-
-	static int frame = 0;
-
-	void PPU::render(SDL_Renderer *renderer){
-		if(mFrame == nullptr){
-			mFrame = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 240);
-		}
-
-		if(mCurrentScanLine == 240 && mCurrentCycle == 0){
-			frame++;
-			
-			SDL_LockTexture(mFrame, nullptr, (void **) &mPixelData, (int *) &mPitch);
-	
-			renderFrame(renderer);
-
-			SDL_UnlockTexture(mFrame);
-
-			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-			SDL_RenderClear(renderer);
-
-			SDL_RenderCopy(renderer, mFrame, nullptr, nullptr);
-
-			SDL_RenderPresent(renderer);
-
-		}
+	void PPU::setRenderer(Renderer *renderer){
+		mRenderer = renderer;
 	}
 
 }}

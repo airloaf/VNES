@@ -73,9 +73,8 @@ void NES::tick()
 	mCycle = (mCycle + 1) % 3;
 }
 
-void NES::render(SDL_Renderer *renderer){
-	mPPU.render(renderer);
-	SDL_SetRenderTarget(renderer, nullptr);
+void NES::setRenderer(PPU::Renderer *renderer){
+	mPPU.setRenderer(renderer);
 }
 
 }

@@ -3,31 +3,12 @@
 #include <stdint.h>
 
 #include <V6502/CPU.h>
-#include <SDL2/SDL.h>
 
 #include "PPURegister.h"
+#include "Renderer.h"
 #include "../MemoryBus/PPUBus.h"
 
 namespace VNES{ namespace PPU{
-
-typedef uint8_t Pixel;
-
-struct ScanLine {
-	Pixel pixels[256];
-};
-
-struct Frame {
-	ScanLine scanLines[240];
-};
-
-// SDL2 specific stuff
-struct PixelData{
-	uint8_t a;
-	uint8_t b;
-	uint8_t g;
-	uint8_t r;
-};
-
 
 class PPU
 {
@@ -44,16 +25,13 @@ class PPU
 
 		void tick();
 
-		void render(SDL_Renderer* renderer);
+		void setRenderer(Renderer *renderer);
 
 	private:
 
 		uint8_t fetchPatternHigh(uint8_t tileEntry, uint8_t row);
 		uint8_t fetchPatternLow(uint8_t tileEntry, uint8_t row);
 		uint8_t fetchNametableEntry(uint8_t row, uint8_t col);
-
-		void renderFrame(SDL_Renderer* renderer);
-		void renderPatternTable(SDL_Renderer* renderer);
 
 		void handleCycle();
 
@@ -76,11 +54,12 @@ class PPU
 
 		Frame mFrameData;
 
-		SDL_Texture* mFrame;
-
 		// Pixel data
 		PixelData *mPixelData;
 		int mPitch[241];
+
+		// Our renderer instance
+		Renderer* mRenderer;
 };
 
 }}

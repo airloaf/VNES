@@ -3,9 +3,7 @@
 namespace VNES {namespace MemoryBus {
 
 
-	PPUBus::PPUBus() : mMapper(nullptr)
-	{
-	}
+	PPUBus::PPUBus() : mMapper(nullptr){}
 
 	PPUBus::~PPUBus()
 	{
@@ -41,6 +39,15 @@ namespace VNES {namespace MemoryBus {
 			retValue = mNameTables[index].read(address);
 		}
 
+		if(address >= 0x3F00 && address < 0x4000){
+			address = address - 0x3F00;
+			if(address % 4 == 0){
+				retValue = mPalletes[0];
+			}else{
+				retValue = mPalletes[address % 0x20];
+			}
+		}
+
 		return retValue;
 	}
 
@@ -71,6 +78,15 @@ namespace VNES {namespace MemoryBus {
 				address -= 0x2C00;
 			}
 			mNameTables[index].write(address, value);
+		}
+		
+		if(address >= 0x3F00 && address < 0x4000){
+			address = address - 0x3F00;
+			if(address % 4 == 0){
+				mPalletes[0] = value;
+			}else{
+				mPalletes[address % 0x20] = value;
+			}
 		}
 	}
 

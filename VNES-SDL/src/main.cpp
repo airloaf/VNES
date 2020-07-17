@@ -2,6 +2,8 @@
 
 #include "NES.h"
 
+#include "PPU/SDL2Renderer.h"
+
 int main(int argc, char* argv[]) {
 
 	VNES::NES nes;
@@ -14,6 +16,10 @@ int main(int argc, char* argv[]) {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Window* window = SDL_CreateWindow("VNES", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 960, SDL_WINDOW_SHOWN);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+	// Create and set the ppu renderer
+	SDL2Renderer ppuRenderer;
+	nes.setRenderer(&ppuRenderer);
 
 	bool quit = false;
 	int poll = 0;
@@ -28,7 +34,9 @@ int main(int argc, char* argv[]) {
 		}
 
 		nes.tick();
-		nes.render(renderer);
+
+		ppuRenderer.render(renderer);
+
 		poll++;
 		poll %= 300000;
 	}
