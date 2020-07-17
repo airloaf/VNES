@@ -5,7 +5,11 @@
 int main(int argc, char* argv[]) {
 
 	VNES::NES nes;
-	nes.loadRom("../roms/DonkeyKong.nes");
+	if(argc == 2){
+		nes.loadRom(argv[1]);
+	}else{
+		nes.loadRom("../roms/DonkeyKong.nes");
+	}
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Window* window = SDL_CreateWindow("VNES", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 960, SDL_WINDOW_SHOWN);

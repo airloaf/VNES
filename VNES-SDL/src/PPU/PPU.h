@@ -20,6 +20,15 @@ struct Frame {
 	ScanLine scanLines[240];
 };
 
+// SDL2 specific stuff
+struct PixelData{
+	uint8_t a;
+	uint8_t b;
+	uint8_t g;
+	uint8_t r;
+};
+
+
 class PPU
 {
 	public:
@@ -43,7 +52,7 @@ class PPU
 		uint8_t fetchPatternLow(uint8_t tileEntry, uint8_t row);
 		uint8_t fetchNametableEntry(uint8_t row, uint8_t col);
 
-		void renderScanLine(SDL_Renderer* renderer);
+		void renderFrame(SDL_Renderer* renderer);
 		void renderPatternTable(SDL_Renderer* renderer);
 
 		void handleCycle();
@@ -65,9 +74,13 @@ class PPU
 		// Reference to CPU so we can generate NMI requests
 		V6502::CPU *mCPU;
 
-		ScanLine mScanLine;
+		Frame mFrameData;
 
 		SDL_Texture* mFrame;
+
+		// Pixel data
+		PixelData *mPixelData;
+		int mPitch[241];
 };
 
 }}

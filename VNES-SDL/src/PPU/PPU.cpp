@@ -180,14 +180,14 @@ namespace VNES {namespace PPU {
 		if(mCurrentScanLine >= 0 && mCurrentScanLine <= 239){
 			if(mCurrentCycle >= 1 && mCurrentCycle <= 256){
 				int tileCycle = mCurrentCycle - 1;
-				if(tileCycle % 8 == 0){
+				if (tileCycle % 8 == 0) {
 					// Figure out which tile to render
 					uint8_t tileCol = tileCycle / 8;
 					uint8_t tileEntry = fetchNametableEntry(mCurrentScanLine / 8, tileCol);
 
 					uint8_t tileLowBitPlane = fetchPatternLow(tileEntry, mCurrentScanLine % 8);
 					uint8_t tileHighBitPlane = fetchPatternHigh(tileEntry, mCurrentScanLine % 8);
-				
+
 					uint8_t low0 = (tileLowBitPlane & 0x80) >> 7;
 					uint8_t low1 = (tileLowBitPlane & 0x40) >> 6;
 					uint8_t low2 = (tileLowBitPlane & 0x20) >> 5;
@@ -196,7 +196,7 @@ namespace VNES {namespace PPU {
 					uint8_t low5 = (tileLowBitPlane & 0x04) >> 2;
 					uint8_t low6 = (tileLowBitPlane & 0x02) >> 1;
 					uint8_t low7 = (tileLowBitPlane & 0x01) >> 0;
-					
+
 					uint8_t high0 = (tileHighBitPlane & 0x80) >> 6;
 					uint8_t high1 = (tileHighBitPlane & 0x40) >> 5;
 					uint8_t high2 = (tileHighBitPlane & 0x20) >> 4;
@@ -206,14 +206,15 @@ namespace VNES {namespace PPU {
 					uint8_t high6 = (tileHighBitPlane & 0x02) >> 0;
 					uint8_t high7 = (tileHighBitPlane & 0x01) << 1;
 
-					mScanLine.pixels[tileCycle + 0] = 0x00 | high0 | low0;
-					mScanLine.pixels[tileCycle + 1] = 0x00 | high1 | low1;
-					mScanLine.pixels[tileCycle + 2] = 0x00 | high2 | low2;
-					mScanLine.pixels[tileCycle + 3] = 0x00 | high3 | low3;
-					mScanLine.pixels[tileCycle + 4] = 0x00 | high4 | low4;
-					mScanLine.pixels[tileCycle + 5] = 0x00 | high5 | low5;
-					mScanLine.pixels[tileCycle + 6] = 0x00 | high6 | low6;
-					mScanLine.pixels[tileCycle + 7] = 0x00 | high7 | low7;
+					ScanLine& scanLine = mFrameData.scanLines[mCurrentScanLine];
+					scanLine.pixels[tileCycle + 0] = 0x00 | high0 | low0;
+					scanLine.pixels[tileCycle + 1] = 0x00 | high1 | low1;
+					scanLine.pixels[tileCycle + 2] = 0x00 | high2 | low2;
+					scanLine.pixels[tileCycle + 3] = 0x00 | high3 | low3;
+					scanLine.pixels[tileCycle + 4] = 0x00 | high4 | low4;
+					scanLine.pixels[tileCycle + 5] = 0x00 | high5 | low5;
+					scanLine.pixels[tileCycle + 6] = 0x00 | high6 | low6;
+					scanLine.pixels[tileCycle + 7] = 0x00 | high7 | low7;
 				}
 			}
 		}
@@ -228,25 +229,39 @@ namespace VNES {namespace PPU {
 		mCPU = cpu;
 	}
 
-	void PPU::renderScanLine(SDL_Renderer *renderer){
-		int row = mCurrentScanLine;
-		for(int i = 0; i < 256; i++){
-			int pallete = mScanLine.pixels[i];
-			switch(pallete){
-			case 0:
-				SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-				break;
-			case 1:
-				SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-				break;
-			case 2:
-				SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
-				break;
-			case 3:
-				SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
-				break;
+	void PPU::renderFrame(SDL_Renderer *renderer){
+		for(int row = 0; row < 240; row++){
+			ScanLine scanLine = mFrameData.scanLines[row];
+			for(int col = 0; col < 256; col++){
+				int pallete = scanLine.pixels[col];
+				PixelData &data = mPixelData[row * 256 + col];
+				switch(pallete){
+				case 0:
+					data.r = 0x00;
+					data.g = 0x00;
+					data.b = 0x00;
+					data.a = 0xFF;
+					break;
+				case 1:
+					data.r = 0xFF;
+					data.g = 0x00;
+					data.b = 0x00;
+					data.a = 0xFF;
+					break;
+				case 2:
+					data.r = 0x00;
+					data.g = 0xFF;
+					data.b = 0x00;
+					data.a = 0xFF;
+					break;
+				case 3:
+					data.r = 0x00;
+					data.g = 0x00;
+					data.b = 0xFF;
+					data.a = 0xFF;
+					break;
+				}
 			}
-			SDL_RenderDrawPoint(renderer, i, row);
 		}
 	}
 
@@ -314,23 +329,25 @@ namespace VNES {namespace PPU {
 
 	void PPU::render(SDL_Renderer *renderer){
 		if(mFrame == nullptr){
-			mFrame = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 240);
-		}
-
-		if(mCurrentScanLine < 240 && mCurrentCycle == 00){
-			SDL_SetRenderTarget(renderer, mFrame);
-
-			renderScanLine(renderer);
+			mFrame = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 240);
 		}
 
 		if(mCurrentScanLine == 240 && mCurrentCycle == 0){
-			SDL_SetRenderTarget(renderer, nullptr);
+			frame++;
+			
+			SDL_LockTexture(mFrame, nullptr, (void **) &mPixelData, (int *) &mPitch);
+	
+			renderFrame(renderer);
+
+			SDL_UnlockTexture(mFrame);
+
 			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 			SDL_RenderClear(renderer);
-			//renderPatternTable(renderer);
-			//SDL_SetRenderTarget(renderer, nullptr);
+
 			SDL_RenderCopy(renderer, mFrame, nullptr, nullptr);
+
 			SDL_RenderPresent(renderer);
+
 		}
 	}
 
