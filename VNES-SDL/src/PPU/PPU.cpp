@@ -170,15 +170,7 @@ namespace VNES {namespace PPU {
 		// If overflow occurs in coarseX
 		// we want to switch to the appropriate nametable
 		if((mScrollV.coarseX & 0x20) != 0){
-			// TODO: This is ugly
-			// Check if we are on the right hand side of nametables
-			// if we are, incrememnting the nametable value
-			// will put us at the wrong left hand side nametable (0x2000 or 0x2800)
-			if((mScrollV.nameTable & 0x01) == 0){
-				mScrollV.nameTable++;
-			}else{
-				mScrollV.nameTable &= 0x02;
-			}
+			mScrollV.nameTable ^= 0x01;
 		}
 
 		// Strip upper bits
@@ -196,9 +188,7 @@ namespace VNES {namespace PPU {
 			// Check if coarseY exceeds 29 (30 and 31 is where the attribute table lay)
 			if(mScrollV.coarseY > 29){
 				mScrollV.coarseY = 0;
-
-				mScrollV.nameTable += 0x02;
-				mScrollV.nameTable &= 0x03;
+				mScrollV.nameTable ^= 0x02;
 			}
 
 			// Strip upper bits
