@@ -1,7 +1,5 @@
 #include "SDL2Renderer.h"
 
-#include <iostream>
-
 using namespace VNES::PPU;
 
 SDL2Renderer::SDL2Renderer(): mFrameTexture(nullptr), mPixelData(nullptr), mPitch(nullptr) {}

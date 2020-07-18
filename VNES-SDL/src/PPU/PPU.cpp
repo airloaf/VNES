@@ -66,7 +66,7 @@ namespace VNES {namespace PPU {
 		switch(address){
 			case PPUCTRL_ADDRESS:
 				mRegisters.PPUCTRL = value;
-				mScrollRegisters.nameTable = value & 0x03;
+				mScrollT.nameTable = value & 0x03;
 				mRegisters.useLeftPatternTable = ((value & 0x10) == 0);
 				break;
 			case PPUMASK_ADDRESS:
@@ -83,11 +83,11 @@ namespace VNES {namespace PPU {
 				break;
 			case PPUSCROLL_ADDRESS:
 				if(mFirstScrollWrite){
-					mScrollRegisters.fineX = value & 0x07;
-					mScrollRegisters.coarseX = ((value & 0xF8) >> 3);
+					mScrollT.fineX = value & 0x07;
+					mScrollT.coarseX = ((value & 0xF8) >> 3);
 				}else{
-					mScrollRegisters.fineY = value & 0x07;
-					mScrollRegisters.coarseY = ((value & 0xF8) >> 3);
+					mScrollT.fineY = value & 0x07;
+					mScrollT.coarseY = ((value & 0xF8) >> 3);
 				}
 				break;
 			case PPUADDR_ADDRESS:
@@ -114,10 +114,10 @@ namespace VNES {namespace PPU {
 	
 	void PPU::tick()
 	{
-		handleCycle();
-
 		// Increment the cycles
 		mCurrentCycle++;
+
+		handleCycle();
 
 		// Reset NMI after a couple of clock cycles, 6 CPU cycles
 		if(mCurrentScanLine == 241 && mCurrentCycle == 18){
@@ -163,25 +163,97 @@ namespace VNES {namespace PPU {
 		}
 	}
 
-	uint8_t PPU::fetchPatternHigh(uint8_t tileEntry, uint8_t row){
-		uint16_t tableSection = mRegisters.useLeftPatternTable ? 0x0000 : 0x1000;
-		uint16_t patternAddress = tableSection | (tileEntry << 4) | row;
-		return mBus->read(patternAddress);
+	void PPU::loopyIncrementHorizontal(){
+		// Increment coarse X
+		mScrollV.coarseX++;
+
+		// If overflow occurs in coarseX
+		// we want to switch to the appropriate nametable
+		if((mScrollV.coarseX & 0x20) != 0){
+			// TODO: This is ugly
+			// Check if we are on the right hand side of nametables
+			// if we are, incrememnting the nametable value
+			// will put us at the wrong left hand side nametable (0x2000 or 0x2800)
+			if((mScrollV.nameTable & 0x01) == 0){
+				mScrollV.nameTable++;
+			}else{
+				mScrollV.nameTable &= 0x02;
+			}
+		}
+
+		// Strip upper bits
+		mScrollV.coarseX &= 0x1F;
 	}
 
-	uint8_t PPU::fetchPatternLow(uint8_t tileEntry, uint8_t row) {
-		uint16_t tableSection = mRegisters.useLeftPatternTable ? 0x0000 : 0x1000;
-		uint16_t patternAddress = tableSection | (tileEntry << 4) | row + 8;
-		return mBus->read(patternAddress);
+	void PPU::loopyIncrementVertical(){
+
+		mScrollV.fineY++;
+
+		// Check if we increment past the tile
+		if((mScrollV.fineY & 0x08) != 0){
+			mScrollV.coarseY++;
+
+			// Check if coarseY exceeds 29 (30 and 31 is where the attribute table lay)
+			if(mScrollV.coarseY > 29){
+				mScrollV.coarseY = 0;
+
+				mScrollV.nameTable += 0x02;
+				mScrollV.nameTable &= 0x03;
+			}
+
+			// Strip upper bits
+			mScrollV.coarseY &= 0x1F;
+		}
+
+		mScrollV.fineY &= 0x07;
+
 	}
 
-	uint8_t PPU::fetchNametableEntry(uint8_t row, uint8_t col){
-		uint16_t baseNameTable = 0x2000;
-		uint16_t nameTableOffset = row * 32 + col;
-		return mBus->read(baseNameTable + nameTableOffset);
+	void PPU::loopyCopyHorizontal(){
+		mScrollV.coarseX = mScrollT.coarseX;
+
+		mScrollV.nameTable &= 0x02;
+		if((mScrollT.nameTable & 0x01) != 0){
+			mScrollV.nameTable |= 0x01;
+		}
+	}
+
+	void PPU::loopyCopyVertical(){
+		mScrollV.fineY = mScrollT.fineY;
+		mScrollV.coarseY = mScrollT.coarseY;
+
+		mScrollV.nameTable &= 0x01;
+		if((mScrollT.nameTable & 0x02) != 0){
+			mScrollV.nameTable |= 0x02;
+		}
 	}
 
 	void PPU::handleCycle(){
+
+		// Increment horizontal V
+		// Cycle must be a multiple of 8 and must be between (0,256) or [328,336]
+		if(mCurrentCycle % 8 == 0){
+			if((mCurrentCycle > 0 && mCurrentCycle < 256) ||
+			(mCurrentCycle >= 328 && mCurrentCycle <= 336)){
+				loopyIncrementHorizontal();
+			}
+		}
+		
+		if(mCurrentCycle == 256){
+			loopyIncrementVertical();
+		}
+
+		if(mCurrentCycle == 257){
+			loopyCopyHorizontal();
+		}
+
+		if(mCurrentScanLine == 261){
+			if(mCurrentCycle >= 280 && mCurrentCycle <= 304){
+				loopyCopyVertical();
+			}
+		}
+
+
 		if(mCurrentScanLine >= 0 && mCurrentScanLine <= 239){
 			if(mCurrentCycle >= 1 && mCurrentCycle <= 256){
 				int tileCycle = mCurrentCycle - 1;
@@ -223,6 +295,24 @@ namespace VNES {namespace PPU {
 				}
 			}
 		}
+	}
+
+	uint8_t PPU::fetchPatternHigh(uint8_t tileEntry, uint8_t row){
+		uint16_t tableSection = mRegisters.useLeftPatternTable ? 0x0000 : 0x1000;
+		uint16_t patternAddress = tableSection | (tileEntry << 4) | row;
+		return mBus->read(patternAddress);
+	}
+
+	uint8_t PPU::fetchPatternLow(uint8_t tileEntry, uint8_t row) {
+		uint16_t tableSection = mRegisters.useLeftPatternTable ? 0x0000 : 0x1000;
+		uint16_t patternAddress = tableSection | (tileEntry << 4) | row + 8;
+		return mBus->read(patternAddress);
+	}
+
+	uint8_t PPU::fetchNametableEntry(uint8_t row, uint8_t col){
+		uint16_t baseNameTable = 0x2000 + mScrollV.nameTable * 0x400;
+		uint16_t nameTableOffset = row * 32 + col;
+		return mBus->read(baseNameTable + nameTableOffset);
 	}
 
 	void PPU::setMemoryBus(MemoryBus::PPUBus* bus)
