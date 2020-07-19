@@ -28,22 +28,22 @@ class PPU
 		void setRenderer(Renderer *renderer);
 
 	private:
-		uint8_t fetchPatternHigh(uint8_t tileEntry, uint8_t row);
-		uint8_t fetchPatternLow(uint8_t tileEntry, uint8_t row);
-		uint8_t fetchNametableEntry(uint8_t row, uint8_t col);
+		// Scrolling functions
+		void fetchNameTable();
+		void fetchAttribute();
+		void fetchPatternLow();
+		void fetchPatternHigh();
 
+		Pixel generatePixel();
 
 		// LOOPY FUNCTIONS
 		// http://wiki.nesdev.com/w/index.php/PPU_scrolling
 		void loopyIncrementHorizontal();
 		void loopyIncrementVertical();
-
 		void loopyCopyHorizontal();
 		void loopyCopyVertical();
 
 		void handleCycle();
-
-		PPURegisters mRegisters;
 
 		// These scroll registers are based off of loopy's scrolling design.
 		// V can be thought of as the current address in VRAM.
@@ -51,6 +51,13 @@ class PPU
 		// of the top left tile to be rendered.
 		ScrollRegister mScrollV;
 		ScrollRegister mScrollT;
+
+		// The different internal registers for graphics
+		uint8_t mCurrentNameTableEntry;
+		uint16_t mPatternLowShiftRegister;
+		uint16_t mPatternHighShiftRegister;
+
+		PPURegisters mRegisters;
 
 		// PPU bus
 		MemoryBus::PPUBus *mBus;

@@ -16,12 +16,23 @@ namespace VNES{ namespace PPU{
 #define PPUDATA_ADDRESS		0x2007
 #define OAMDMA_ADDRESS		0x4014
 
+struct PPUMask {
+	bool greyscale;
+	bool showBorderBackground;
+	bool showBorderSprites;
+	bool showBackground;
+	bool showSprites;
+	bool emphasizeRed;
+	bool emphasizeGreen;
+	bool emphasizeBlue;
+};
+
 /**
  * The 9 registers of the PPU
  */
 struct PPURegisters{
 	uint8_t PPUCTRL;		// 0x2000
-	uint8_t PPUMASK;		// 0x2001
+	PPUMask mask;			// 0x2001
 	uint8_t PPUSTATUS;		// 0x2002
 	uint8_t OAMADDR;		// 0x2003
 	uint8_t OAMDATA;		// 0x2004

@@ -1,6 +1,11 @@
 #include "PPU.h"
 
-#include <iostream>
+#define NAMETABLE_COLS 32
+#define NAMETABLE_ROWS 30
+
+#define PATTERNTABLE_COLS 16
+#define PATTERNTABLE_ROWS 16
+#define BYTES_PER_TILE 16
 
 namespace VNES {namespace PPU {
 
@@ -16,10 +21,10 @@ namespace VNES {namespace PPU {
 		uint8_t retValue = 0;
 		switch(address){
 			case PPUCTRL_ADDRESS:
-				retValue = mRegisters.PPUCTRL;
+				retValue = 0;
 				break;
 			case PPUMASK_ADDRESS:
-				retValue = mRegisters.PPUMASK;
+				retValue = 0;
 				break;
 			case PPUSTATUS_ADDRESS:
 				retValue = mRegisters.PPUSTATUS;
@@ -49,6 +54,8 @@ namespace VNES {namespace PPU {
 				break;
 			case PPUDATA_ADDRESS:
 				retValue = mRegisters.PPUDATA;
+				// Increment the address now
+				mRegisters.PPUADDR += (mRegisters.PPUCTRL & 0x04) == 0 ? 1 : 32;
 				break;
 			case OAMDMA_ADDRESS:
 				retValue = mRegisters.OAMDMA;
@@ -62,6 +69,7 @@ namespace VNES {namespace PPU {
 	{
 		// Used by PPUADDR
 		int addressBitShift = 0;
+		PPUMask &mask = mRegisters.mask;
 
 		switch(address){
 			case PPUCTRL_ADDRESS:
@@ -70,7 +78,14 @@ namespace VNES {namespace PPU {
 				mRegisters.useLeftPatternTable = ((value & 0x10) == 0);
 				break;
 			case PPUMASK_ADDRESS:
-				mRegisters.PPUMASK = value;
+				mask.greyscale = (value & 0x01) != 0;
+				mask.showBorderBackground = (value & 0x02) != 0;
+				mask.showBorderSprites = (value & 0x04) != 0;
+				mask.showBackground = (value & 0x08) != 0;
+				mask.showSprites = (value & 0x10) != 0;
+				mask.emphasizeRed = (value & 0x20) != 0;
+				mask.emphasizeGreen = (value & 0x40) != 0;
+				mask.emphasizeBlue = (value & 0x80) != 0;
 				break;
 			case PPUSTATUS_ADDRESS:
 				mRegisters.PPUSTATUS = value;
@@ -163,6 +178,150 @@ namespace VNES {namespace PPU {
 		}
 	}
 
+	bool isVisibleScanLine(int scanLine){
+		return scanLine >= 0 && scanLine <= 239;
+	}
+
+	bool isPreRenderScanLine(int scanLine){
+		return scanLine == 261 || scanLine == -1;
+	}
+
+	bool isPostRenderScanLine(int scanLine){
+		return scanLine > 239 && scanLine < 261;
+	}
+
+	void PPU::handleCycle(){
+
+		// Ignore cycle 0
+		if (mCurrentCycle == 0) {
+			return;
+		}
+
+		if(isVisibleScanLine(mCurrentScanLine) || isPreRenderScanLine(mCurrentScanLine)){
+			// Increment horizontal V
+			// Cycle must be a multiple of 8 and must be between (0,256) or [328,336]
+			if(mCurrentCycle % 8 == 0){
+				if((mCurrentCycle > 0 && mCurrentCycle < 256) ||
+				(mCurrentCycle == 328 || mCurrentCycle == 336)){
+					loopyIncrementHorizontal();
+				}
+			}
+			
+			if(mCurrentCycle == 256){
+				loopyIncrementVertical();
+			}
+
+			if(mCurrentCycle == 257){
+				loopyCopyHorizontal();
+			}
+		}
+
+		if(isPreRenderScanLine(mCurrentScanLine)){
+			if(mCurrentCycle >= 280 && mCurrentCycle <= 304){
+				loopyCopyVertical();
+			}
+		}
+
+		if(isVisibleScanLine(mCurrentScanLine) || isPreRenderScanLine(mCurrentScanLine)){
+			if((mCurrentCycle >= 1 && mCurrentCycle <= 256) || (mCurrentCycle >= 321 && mCurrentCycle <= 336)){
+				// Fetch cycle represents which
+				uint8_t fetchCycle = mCurrentCycle - 1;
+				switch(fetchCycle % 8){
+				case 0:
+					fetchNameTable();
+					break;
+				case 2:
+					fetchAttribute();
+					break;
+				case 4:
+					fetchPatternLow();
+					break;
+				case 6:
+					fetchPatternHigh();
+					break;
+				}
+
+				// Shift the shift registers by 8 bits at scan line 328 since we are loading patterns for next line
+				/**/
+				if(mCurrentCycle == 328){
+					mPatternLowShiftRegister <<= 8;
+					mPatternHighShiftRegister <<= 8;
+				}
+			}
+		}
+		
+		// Compute Pixel
+		if(isVisibleScanLine(mCurrentScanLine) && (mCurrentCycle > 0 && mCurrentCycle <= 256)){
+			Pixel p = generatePixel();
+
+			ScanLine &s = mFrameData.scanLines[mCurrentScanLine];
+			s.pixels[mCurrentCycle - 1] = p;
+
+			mPatternLowShiftRegister <<= 1;
+			mPatternHighShiftRegister <<= 1;
+		}
+
+	}
+
+	Pixel PPU::generatePixel(){
+		if(mCurrentCycle <= 8 && !mRegisters.mask.showBorderBackground){
+			return 0;
+		}
+
+		uint16_t pixelMask = 0x8000 >> mScrollV.fineX;
+		uint16_t restShift = (15 - mScrollV.fineX);
+		uint16_t lowBit = (mPatternLowShiftRegister & pixelMask) >> restShift;
+		uint16_t highBit = (mPatternHighShiftRegister & pixelMask) >> restShift;
+
+		uint16_t attributeIndex = (highBit << 1) | lowBit;
+		Pixel retPixel = attributeIndex;
+		return retPixel;
+	}
+
+	void PPU::fetchNameTable(){
+		uint16_t baseNameTable = 0x2000 + mScrollV.nameTable * 0x400;
+		uint16_t nameTableOffset = mScrollV.coarseY * NAMETABLE_COLS + mScrollV.coarseX;
+		uint16_t vramAddress = baseNameTable + nameTableOffset;
+
+		uint8_t retValue = mBus->read(vramAddress);
+		mCurrentNameTableEntry = retValue;
+	}
+	
+	void PPU::fetchAttribute(){
+	}
+
+	uint16_t generatePatternTableAddress(bool leftTable, uint8_t tileEntry){
+		uint16_t patternTable = leftTable? 0x0000: 0x1000;
+		uint16_t patternTableOffset = tileEntry * BYTES_PER_TILE;
+		uint16_t vramAddress = patternTable + patternTableOffset;
+		return vramAddress;
+	}
+
+	void PPU::fetchPatternLow(){
+		bool leftTable = (mRegisters.PPUCTRL & 0x04) == 0;
+		uint16_t vramAddress = generatePatternTableAddress(mRegisters.useLeftPatternTable, mCurrentNameTableEntry);
+
+		// Add bytes for the pixel row (controlled by fine y)
+		vramAddress += mScrollV.fineY;
+
+		// Read and store bytes into shift register
+		uint16_t lowBytes = mBus->read(vramAddress);
+		mPatternLowShiftRegister |= (0x00FF & lowBytes);
+	}
+	
+	void PPU::fetchPatternHigh(){
+		bool leftTable = (mRegisters.PPUCTRL & 0x04) == 0;
+		uint16_t vramAddress = generatePatternTableAddress(mRegisters.useLeftPatternTable, mCurrentNameTableEntry);
+
+		// Add bytes for the pixel row (controlled by fine y)
+		// 8 bytes added since high plane is 8 bytes away from low plane
+		vramAddress += mScrollV.fineY + 8;
+
+		// Read and store bytes into shift register
+		uint16_t highBytes = mBus->read(vramAddress);
+		mPatternHighShiftRegister |= (0x00FF & highBytes);
+	}
+
 	void PPU::loopyIncrementHorizontal(){
 		// Increment coarse X
 		mScrollV.coarseX++;
@@ -216,93 +375,6 @@ namespace VNES {namespace PPU {
 		if((mScrollT.nameTable & 0x02) != 0){
 			mScrollV.nameTable |= 0x02;
 		}
-	}
-
-	void PPU::handleCycle(){
-
-		// Increment horizontal V
-		// Cycle must be a multiple of 8 and must be between (0,256) or [328,336]
-		if(mCurrentCycle % 8 == 0){
-			if((mCurrentCycle > 0 && mCurrentCycle < 256) ||
-			(mCurrentCycle >= 328 && mCurrentCycle <= 336)){
-				loopyIncrementHorizontal();
-			}
-		}
-		
-		if(mCurrentCycle == 256){
-			loopyIncrementVertical();
-		}
-
-		if(mCurrentCycle == 257){
-			loopyCopyHorizontal();
-		}
-
-		if(mCurrentScanLine == 261){
-			if(mCurrentCycle >= 280 && mCurrentCycle <= 304){
-				loopyCopyVertical();
-			}
-		}
-
-
-		if(mCurrentScanLine >= 0 && mCurrentScanLine <= 239){
-			if(mCurrentCycle >= 1 && mCurrentCycle <= 256){
-				int tileCycle = mCurrentCycle - 1;
-				if (tileCycle % 8 == 0) {
-					// Figure out which tile to render
-					uint8_t tileCol = tileCycle / 8;
-					uint8_t tileEntry = fetchNametableEntry(mCurrentScanLine / 8, tileCol);
-
-					uint8_t tileLowBitPlane = fetchPatternLow(tileEntry, mCurrentScanLine % 8);
-					uint8_t tileHighBitPlane = fetchPatternHigh(tileEntry, mCurrentScanLine % 8);
-
-					uint8_t low0 = (tileLowBitPlane & 0x80) >> 7;
-					uint8_t low1 = (tileLowBitPlane & 0x40) >> 6;
-					uint8_t low2 = (tileLowBitPlane & 0x20) >> 5;
-					uint8_t low3 = (tileLowBitPlane & 0x10) >> 4;
-					uint8_t low4 = (tileLowBitPlane & 0x08) >> 3;
-					uint8_t low5 = (tileLowBitPlane & 0x04) >> 2;
-					uint8_t low6 = (tileLowBitPlane & 0x02) >> 1;
-					uint8_t low7 = (tileLowBitPlane & 0x01) >> 0;
-
-					uint8_t high0 = (tileHighBitPlane & 0x80) >> 6;
-					uint8_t high1 = (tileHighBitPlane & 0x40) >> 5;
-					uint8_t high2 = (tileHighBitPlane & 0x20) >> 4;
-					uint8_t high3 = (tileHighBitPlane & 0x10) >> 3;
-					uint8_t high4 = (tileHighBitPlane & 0x08) >> 2;
-					uint8_t high5 = (tileHighBitPlane & 0x04) >> 1;
-					uint8_t high6 = (tileHighBitPlane & 0x02) >> 0;
-					uint8_t high7 = (tileHighBitPlane & 0x01) << 1;
-
-					ScanLine& scanLine = mFrameData.scanLines[mCurrentScanLine];
-					scanLine.pixels[tileCycle + 0] = 0x00 | high0 | low0;
-					scanLine.pixels[tileCycle + 1] = 0x00 | high1 | low1;
-					scanLine.pixels[tileCycle + 2] = 0x00 | high2 | low2;
-					scanLine.pixels[tileCycle + 3] = 0x00 | high3 | low3;
-					scanLine.pixels[tileCycle + 4] = 0x00 | high4 | low4;
-					scanLine.pixels[tileCycle + 5] = 0x00 | high5 | low5;
-					scanLine.pixels[tileCycle + 6] = 0x00 | high6 | low6;
-					scanLine.pixels[tileCycle + 7] = 0x00 | high7 | low7;
-				}
-			}
-		}
-	}
-
-	uint8_t PPU::fetchPatternHigh(uint8_t tileEntry, uint8_t row){
-		uint16_t tableSection = mRegisters.useLeftPatternTable ? 0x0000 : 0x1000;
-		uint16_t patternAddress = tableSection | (tileEntry << 4) | row;
-		return mBus->read(patternAddress);
-	}
-
-	uint8_t PPU::fetchPatternLow(uint8_t tileEntry, uint8_t row) {
-		uint16_t tableSection = mRegisters.useLeftPatternTable ? 0x0000 : 0x1000;
-		uint16_t patternAddress = tableSection | (tileEntry << 4) | row + 8;
-		return mBus->read(patternAddress);
-	}
-
-	uint8_t PPU::fetchNametableEntry(uint8_t row, uint8_t col){
-		uint16_t baseNameTable = 0x2000 + mScrollV.nameTable * 0x400;
-		uint16_t nameTableOffset = row * 32 + col;
-		return mBus->read(baseNameTable + nameTableOffset);
 	}
 
 	void PPU::setMemoryBus(MemoryBus::PPUBus* bus)

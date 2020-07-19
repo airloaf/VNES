@@ -17,7 +17,7 @@ namespace VNES {namespace MemoryBus {
 			retValue = mMapper->ppu_read(address);
 		}
 
-		if (address >= 0x2000 && address < 0x3EFF) {
+		if (address >= 0x2000 && address <= 0x3EFF) {
 			if (address >= 0x3000) {
 				address = 0x2000 + (address - 0x3000);
 			}
