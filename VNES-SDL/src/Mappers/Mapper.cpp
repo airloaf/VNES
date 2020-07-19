@@ -14,5 +14,9 @@ namespace VNES { namespace Mapper {
 	{
 		mFile = file;
 	}
+
+	FileParser::NametableMirroring Mapper::getMirroring(){
+		return mFile->getFileHeader().mirroring;
+	}
 	
 }}

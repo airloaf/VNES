@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Utilities\NameTableRenderer.cpp" />
     <ClCompile Include="src\PPU\SDL2Renderer.cpp" />
     <ClCompile Include="src\PPU\NameTable.cpp" />
     <ClCompile Include="src\MemoryBus\PPUBus.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Utilities\NameTableRenderer.h" />
     <ClInclude Include="src\PPU\SDL2Renderer.h" />
     <ClInclude Include="src\PPU\NameTable.h" />
     <ClInclude Include="src\MemoryBus\PPUBus.h" />

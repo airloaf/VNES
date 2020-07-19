@@ -3,6 +3,7 @@
 #include "NES.h"
 
 #include "PPU/SDL2Renderer.h"
+#include "Utilities/NameTableRenderer.h"
 
 int main(int argc, char* argv[]) {
 
@@ -14,12 +15,17 @@ int main(int argc, char* argv[]) {
 	}
 
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_Window* window = SDL_CreateWindow("VNES", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 960, SDL_WINDOW_SHOWN);
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	// Create and set the ppu renderer
+	SDL_Window* mainWindow = SDL_CreateWindow("VNES", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 960, SDL_WINDOW_SHOWN);
+	SDL_Renderer *mainRenderer = SDL_CreateRenderer(mainWindow, -1, SDL_RENDERER_ACCELERATED);
+	
+	SDL_Window* nameTableWindow = SDL_CreateWindow("NameTableRenderer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 960, SDL_WINDOW_SHOWN);
+	SDL_Renderer *nameTableRenderer = SDL_CreateRenderer(nameTableWindow, -1, SDL_RENDERER_ACCELERATED);
+
 	SDL2Renderer ppuRenderer;
 	nes.setRenderer(&ppuRenderer);
+
+	NameTableRenderer nameTable(&nes);
 
 	bool quit = false;
 	int poll = 0;
@@ -35,7 +41,19 @@ int main(int argc, char* argv[]) {
 
 		nes.tick();
 
-		ppuRenderer.render(renderer);
+		if(ppuRenderer.isReady()){
+			SDL_SetRenderDrawColor(mainRenderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_RenderClear(mainRenderer);
+			
+			SDL_SetRenderDrawColor(nameTableRenderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_RenderClear(nameTableRenderer);
+			
+			ppuRenderer.render(mainRenderer);
+			nameTable.render(nameTableRenderer);
+
+			SDL_RenderPresent(mainRenderer);
+			SDL_RenderPresent(nameTableRenderer);
+		}
 
 		poll++;
 		poll %= 300000;

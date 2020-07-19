@@ -34,6 +34,14 @@ class NES {
 		 */
 		void tick();
 
+		/**
+		 * @brief Read from PPU Bus
+		 * 
+		 * @param address
+		 * \return 
+		 */
+		uint8_t ppuBusRead(uint16_t address);
+
 		void setRenderer(PPU::Renderer *renderer);
 	private:
 		// ROM file

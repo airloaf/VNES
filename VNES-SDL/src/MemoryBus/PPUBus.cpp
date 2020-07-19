@@ -58,7 +58,7 @@ namespace VNES {namespace MemoryBus {
 			mMapper->ppu_write(address, value);
 		}
 
-		if (address >= 0x2000 && address < 0x3EFF) {
+		if (address >= 0x2000 && address <= 0x3EFF) {
 			if (address >= 0x3000) {
 				address = 0x2000 + (address - 0x3000);
 			}
@@ -78,6 +78,7 @@ namespace VNES {namespace MemoryBus {
 				address -= 0x2C00;
 			}
 			mNameTables[index].write(address, value);
+
 		}
 		
 		if(address >= 0x3F00 && address < 0x4000){

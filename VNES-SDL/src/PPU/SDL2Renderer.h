@@ -15,6 +15,8 @@ class SDL2Renderer: public VNES::PPU::Renderer
 
 		void render(SDL_Renderer *sdlRenderer);
 
+		bool isReady();
+
 	private:
 
 		void writeFrameToTexture();

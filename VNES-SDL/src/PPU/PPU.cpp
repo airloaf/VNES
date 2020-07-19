@@ -280,6 +280,7 @@ namespace VNES {namespace PPU {
 
 	void PPU::fetchNameTable(){
 		uint16_t baseNameTable = 0x2000 + mScrollV.nameTable * 0x400;
+		baseNameTable = 0x2000;
 		uint16_t nameTableOffset = mScrollV.coarseY * NAMETABLE_COLS + mScrollV.coarseX;
 		uint16_t vramAddress = baseNameTable + nameTableOffset;
 
@@ -302,7 +303,7 @@ namespace VNES {namespace PPU {
 		uint16_t vramAddress = generatePatternTableAddress(mRegisters.useLeftPatternTable, mCurrentNameTableEntry);
 
 		// Add bytes for the pixel row (controlled by fine y)
-		vramAddress += mScrollV.fineY;
+		vramAddress += mScrollV.fineY + 0;
 
 		// Read and store bytes into shift register
 		uint16_t lowBytes = mBus->read(vramAddress);
@@ -330,32 +331,24 @@ namespace VNES {namespace PPU {
 		// we want to switch to the appropriate nametable
 		if((mScrollV.coarseX & 0x20) != 0){
 			mScrollV.nameTable ^= 0x01;
+			mScrollV.coarseX = 0x0;
 		}
-
-		// Strip upper bits
-		mScrollV.coarseX &= 0x1F;
 	}
 
 	void PPU::loopyIncrementVertical(){
-
 		mScrollV.fineY++;
 
 		// Check if we increment past the tile
 		if((mScrollV.fineY & 0x08) != 0){
+			mScrollV.fineY = 0;
 			mScrollV.coarseY++;
 
 			// Check if coarseY exceeds 29 (30 and 31 is where the attribute table lay)
 			if(mScrollV.coarseY > 29){
-				mScrollV.coarseY = 0;
 				mScrollV.nameTable ^= 0x02;
+				mScrollV.coarseY = 0;
 			}
-
-			// Strip upper bits
-			mScrollV.coarseY &= 0x1F;
 		}
-
-		mScrollV.fineY &= 0x07;
-
 	}
 
 	void PPU::loopyCopyHorizontal(){

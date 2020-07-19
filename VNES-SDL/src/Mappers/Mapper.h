@@ -50,8 +50,10 @@ class Mapper
 		 */
 		virtual void ppu_write(uint16_t address, uint8_t value) = 0;
 
+		FileParser::NametableMirroring getMirroring();
+
 	protected:
-		VNES::FileParser::INESFile *mFile;
+		FileParser::INESFile *mFile;
 
 };
 

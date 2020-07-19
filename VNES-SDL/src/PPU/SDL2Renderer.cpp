@@ -16,6 +16,10 @@ void SDL2Renderer::readyToRender(){
 	mReady = true;
 }
 
+bool SDL2Renderer::isReady(){
+	return mReady;
+}
+
 void SDL2Renderer::writeFrameToTexture(){
 	for(int row = 0; row < 240; row++){
 		ScanLine scanLine = mFrameData.scanLines[row];
@@ -60,9 +64,6 @@ void SDL2Renderer::render(SDL_Renderer* sdlRenderer){
 				SDL_TEXTUREACCESS_STREAMING, 256, 240);
 		}
 
-		SDL_SetRenderDrawColor(sdlRenderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_RenderClear(sdlRenderer);
-
 		SDL_LockTexture(mFrameTexture, nullptr, (void **) &mPixelData, (int *) &mPitch);
 
 		writeFrameToTexture();
@@ -70,8 +71,6 @@ void SDL2Renderer::render(SDL_Renderer* sdlRenderer){
 		SDL_UnlockTexture(mFrameTexture);
 			
 		SDL_RenderCopy(sdlRenderer, mFrameTexture, nullptr, nullptr);
-
-		SDL_RenderPresent(sdlRenderer);
 
 		mReady = false;
 	}

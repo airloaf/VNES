@@ -73,6 +73,10 @@ void NES::tick()
 	mCycle = (mCycle + 1) % 3;
 }
 
+uint8_t NES::ppuBusRead(uint16_t address){
+	return mPPUBus.read(address);
+}
+
 void NES::setRenderer(PPU::Renderer *renderer){
 	mPPU.setRenderer(renderer);
 }

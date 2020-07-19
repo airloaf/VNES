@@ -45,6 +45,9 @@
     <ClCompile Include="src\PPU\SDL2Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utilities\NameTableRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FileParsers\INesFileParser.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PPU\SDL2Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utilities\NameTableRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
