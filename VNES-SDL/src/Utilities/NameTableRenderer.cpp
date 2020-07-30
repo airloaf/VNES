@@ -52,6 +52,19 @@ void NameTableRenderer::renderTexture(){
 
 }
 
+uint8_t NameTableRenderer::fetchAttribute(uint8_t tileRow, uint8_t tileCol){
+	if (tileRow >= 30) {
+		tileRow -= 30;
+	}
+	if(tileCol >= 32){
+		tileCol -= 32;
+	}
+
+	uint16_t colAddr = tileCol / 4;
+	uint16_t rowAddr = (tileRow / 4) * 8;
+	return 0;
+}
+
 uint8_t NameTableRenderer::generatePixel(uint8_t lowBytes, uint8_t highBytes, uint8_t col){
 
 	uint8_t mask = 0x80;
@@ -68,7 +81,7 @@ uint8_t NameTableRenderer::fetchNameTable(uint8_t tileRow, uint8_t tileCol){
 
 	if(tileCol >= 32){
 		vramAddress += 0x400;
-		tileRow -= 32;
+		tileCol -= 32;
 	}
 
 	if(tileRow >= 30){

@@ -34,7 +34,7 @@ class PPUBus: public V6502::MemoryBus
 
 	private:
 		Mapper::Mapper* mMapper;
-		PPU::NameTable mNameTables[4];
+		PPU::NameTable mNameTables[2];
 		uint8_t mPalletes[0x20];
 };
 

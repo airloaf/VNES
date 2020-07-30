@@ -64,7 +64,6 @@ class PPU
 
 		// Writing to the PPUADDR or PPUSCROLL is different depending if its the first or second write
 		bool mFirstAddressWrite;
-		bool mFirstScrollWrite;
 
 		// PPU current Scan line and Cycle
 		int mCurrentScanLine;

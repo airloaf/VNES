@@ -97,21 +97,22 @@ namespace VNES {namespace PPU {
 				mRegisters.OAMDATA = value;
 				break;
 			case PPUSCROLL_ADDRESS:
-				if(mFirstScrollWrite){
+				if(mFirstAddressWrite){
 					mScrollT.fineX = value & 0x07;
 					mScrollT.coarseX = ((value & 0xF8) >> 3);
 				}else{
 					mScrollT.fineY = value & 0x07;
 					mScrollT.coarseY = ((value & 0xF8) >> 3);
 				}
+				mFirstAddressWrite = !mFirstAddressWrite;
 				break;
 			case PPUADDR_ADDRESS:
 				// Depending on whether or not its the first or last bit, we want to write to the address register differently
 				if(mFirstAddressWrite){
 					addressBitShift = 8;
-					mFirstAddressWrite = false;
 				}
 				mRegisters.PPUADDR |= (value << addressBitShift);
+				mFirstAddressWrite = !mFirstAddressWrite;
 				break;
 			case PPUDATA_ADDRESS:
 				// store the value into the register buffer
@@ -134,8 +135,18 @@ namespace VNES {namespace PPU {
 
 		handleCycle();
 
-		// Reset NMI after a couple of clock cycles, 6 CPU cycles
-		if(mCurrentScanLine == 241 && mCurrentCycle == 18){
+		// Check if the vblank flag should be set
+		if (mCurrentScanLine == 241 && mCurrentCycle == 1) {
+			mRegisters.PPUSTATUS |= 0x80;
+
+			if((mRegisters.PPUCTRL & 0x80) != 0){
+				mCPU->setNMI(true);
+			}
+
+		// Check if we need to clear the vblank flag
+		} else if(mCurrentScanLine == 261 && mCurrentCycle == 1){
+			mRegisters.PPUSTATUS &= 0x7F;
+			
 			if((mRegisters.PPUCTRL & 0x80) != 0){
 				mCPU->setNMI(false);
 			}
@@ -143,9 +154,7 @@ namespace VNES {namespace PPU {
 
 		// Check if we are done with the scan line
 		if(mCurrentCycle > 340){
-			// Reset the current cycle
 			mCurrentCycle = 0;
-			// Increment scan line
 			mCurrentScanLine++;
 
 			// If we have finished generating the frame, send it to the renderer
@@ -156,23 +165,8 @@ namespace VNES {namespace PPU {
 				}
 			}
 
-			// Check if the vblank flag should be set
-			if (mCurrentScanLine == 241) {
-
-				// Set vblank flag
-				mRegisters.PPUSTATUS |= 0x80;
-
-				// Throw nmi 
-				if((mRegisters.PPUCTRL & 0x80) != 0){
-					mCPU->setNMI(true);
-				}
-
-			// Check if we need to clear the vblank flag
-			} else if(mCurrentScanLine == 261){
-				mRegisters.PPUSTATUS &= 0x7F;
-
 			// Check if we should reset the scan line to 0
-			}else if(mCurrentScanLine > 261){
+			if(mCurrentScanLine > 261){
 				mCurrentScanLine = 0;
 			}
 		}
@@ -280,7 +274,7 @@ namespace VNES {namespace PPU {
 
 	void PPU::fetchNameTable(){
 		uint16_t baseNameTable = 0x2000 + mScrollV.nameTable * 0x400;
-		baseNameTable = 0x2000;
+		//baseNameTable = 0x2000; // TODO Remove after debugging
 		uint16_t nameTableOffset = mScrollV.coarseY * NAMETABLE_COLS + mScrollV.coarseX;
 		uint16_t vramAddress = baseNameTable + nameTableOffset;
 

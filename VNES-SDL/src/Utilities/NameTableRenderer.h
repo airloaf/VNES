@@ -16,6 +16,8 @@ class NameTableRenderer
 
 		uint8_t fetchNameTable(uint8_t tileRow, uint8_t tileCol);
 
+		uint8_t fetchAttribute(uint8_t tileRow, uint8_t tileCol);
+
 		uint8_t fetchTilePatternLow(uint8_t tileEntry, uint8_t row);
 		uint8_t fetchTilePatternHigh(uint8_t tileEntry, uint8_t row);
 

@@ -59,5 +59,13 @@ int main(int argc, char* argv[]) {
 		poll %= 300000;
 	}
 
+	SDL_DestroyRenderer(nameTableRenderer);
+	SDL_DestroyRenderer(mainRenderer);
+
+	SDL_DestroyWindow(nameTableWindow);
+	SDL_DestroyWindow(mainWindow);
+
+	SDL_Quit();
+
 	return 0;
 }

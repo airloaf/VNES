@@ -24,17 +24,25 @@ namespace VNES {namespace MemoryBus {
 
 			int index = 0;
 			if(address >= 0x2000 && address < 0x2400){
-				index = 0;
 				address -= 0x2000;
+				index = 0;
 			}else if (address >= 0x2400 && address < 0x2800) {
-				index = 1;
 				address -= 0x2400;
+				if(mMapper->getMirroring() == FileParser::NametableMirroring::HORIZONTAL){
+					index = 0;
+				}else {
+					index = 1;
+				}
 			}else if(address >= 0x2800 && address < 0x2C00){
-				index = 2;
 				address -= 0x2800;
+				if(mMapper->getMirroring() == FileParser::NametableMirroring::HORIZONTAL){
+					index = 1;
+				}else {
+					index = 0;
+				}
 			}else if(address >= 0x2C00 && address < 0x3000){
-				index = 3;
 				address -= 0x2C00;
+				index = 1;
 			}
 			retValue = mNameTables[index].read(address);
 		}
@@ -63,19 +71,27 @@ namespace VNES {namespace MemoryBus {
 				address = 0x2000 + (address - 0x3000);
 			}
 
-			int index = 0;
+			int index = -1;
 			if(address >= 0x2000 && address < 0x2400){
-				index = 0;
 				address -= 0x2000;
+				index = 0;
 			}else if (address >= 0x2400 && address < 0x2800) {
-				index = 1;
 				address -= 0x2400;
+				if(mMapper->getMirroring() == FileParser::NametableMirroring::HORIZONTAL){
+					index = 0;
+				}else {
+					index = 1;
+				}
 			}else if(address >= 0x2800 && address < 0x2C00){
-				index = 2;
 				address -= 0x2800;
+				if(mMapper->getMirroring() == FileParser::NametableMirroring::HORIZONTAL){
+					index = 1;
+				}else {
+					index = 0;
+				}
 			}else if(address >= 0x2C00 && address < 0x3000){
-				index = 3;
 				address -= 0x2C00;
+				index = 1;
 			}
 			mNameTables[index].write(address, value);
 
