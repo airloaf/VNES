@@ -38,7 +38,6 @@ namespace VNES {namespace PPU {
 				mRegisters.PPUSCROLL_X = 0x0000;
 				mRegisters.PPUSCROLL_Y = 0x0000;
 				mFirstAddressWrite = true;
-				mFirstScrollWrite = true;
 				break;
 			case OAMADDR_ADDRESS:
 				retValue = mRegisters.OAMADDR;
