@@ -216,7 +216,9 @@ namespace VNES {namespace PPU {
 		}
 
 		if(isVisibleScanLine(mCurrentScanLine) || isPreRenderScanLine(mCurrentScanLine)){
-			if((mCurrentCycle >= 1 && mCurrentCycle <= 256) || (mCurrentCycle >= 321 && mCurrentCycle <= 336)){
+			if((mCurrentCycle > 0 && mCurrentCycle <= 256) || (mCurrentCycle > 320 && mCurrentCycle <= 336)){
+				mPatternLowShiftRegister <<= 1;
+				mPatternHighShiftRegister <<= 1;
 				// Fetch cycle represents which
 				uint8_t fetchCycle = mCurrentCycle - 1;
 				switch(fetchCycle % 8){
@@ -249,9 +251,6 @@ namespace VNES {namespace PPU {
 
 			ScanLine &s = mFrameData.scanLines[mCurrentScanLine];
 			s.pixels[mCurrentCycle - 1] = p;
-
-			mPatternLowShiftRegister <<= 1;
-			mPatternHighShiftRegister <<= 1;
 		}
 
 	}
@@ -313,7 +312,7 @@ namespace VNES {namespace PPU {
 
 		// Read and store bytes into shift register
 		uint16_t highBytes = mBus->read(vramAddress);
-		mPatternHighShiftRegister |= (0x00FF & highBytes);
+		mPatternHighShiftRegister |= ((0x00FF & highBytes) << 2);
 	}
 
 	void PPU::loopyIncrementHorizontal(){
